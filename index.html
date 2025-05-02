@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix - Tecnología y Servicios</title>
+    <meta name="description" content="Matrix: Tu tienda de tecnología en Perú. Encuentra Laptops, Computadoras, Celulares, Cámaras de seguridad, accesorios, servicios técnicos y más.">
+    <link rel="stylesheet" href="style.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Matrix Tecnología",
+      "url": "https://www.matrix.com.pe",
+      "logo": "images/laptop asus.jpjg",
+      "contactPoint": {"@type": "ContactPoint", "telephone": "+51-1-456-7890", "contactType": "Customer Service"},
+      "address": {"@type": "PostalAddress", "streetAddress": "Av. Garcilaso de la Vega 1348, Tienda 1A-123, CyberPlaza", "addressLocality": "Lima", "addressCountry": "PE"}
+    }
+    </script>
+    <script type="application/ld+json">
+    { "@context": "https://schema.org", "@type": "WebSite", "url": "https://www.matrix.com.pe", "potentialAction": {"@type": "SearchAction", "target": "https://www.matrix.com.pe/buscar?q={search_term_string}", "query-input": "required name=search_term_string"} }
+    </script>
+    </head>
+<body>
+
+    <header class="main-header">
+        <a href="/" class="logo">
+            <img src="imagenes/laptop asus.jpg" alt="Matrix Logo" style="height: 40px; margin-right: 10px; vertical-align: middle;"> <span style="vertical-align: middle;">Matrix</span>
+        </a>
+        <form class="search-container" role="search" id="searchForm"> <label for="searchCategoryHeader" class="visually-hidden">Categoría</label>
+            <select id="searchCategoryHeader" name="categoria">
+                <option value="all">Todas</option>
+                <option value="laptops">Laptops</option>
+                <option value="computadoras">Computadoras</option>
+                <option value="celulares">Celulares</option>
+                <option value="camaras">Cámaras</option>
+                <option value="accesorios">Accesorios</option>
+                <option value="gamer">Gamer</option>
+                <option value="servicios">Servicios</option>
+                </select>
+            <label for="searchInputHeader" class="visually-hidden">Buscar</label>
+            <input type="search" id="searchInputHeader" name="q" placeholder="Buscar...">
+            <button type="submit" class="search-btn" aria-label="Buscar">🔍</button>
+        </form>
+        <div class="header-actions">
+             <div class="cart-icon-wrapper">
+                 <button class="action-btn cart-btn" id="cart-icon-btn" aria-label="Carrito de compras" aria-haspopup="true" aria-expanded="false" aria-controls="cartDropdown">
+                     🛒<span class="cart-count">0</span>
+                 </button>
+                 <div class="cart-dropdown" id="cartDropdown" aria-labelledby="cart-heading">
+                    <h3 id="cart-heading" class="cart-header"> Mi Carrito (<span class="cart-count">0</span>) </h3>
+                    <div class="cart-items" id="cartItemsContainer"> <p class="empty-cart-message">Tu carrito está vacío</p> </div>
+                    <div class="cart-footer">
+                        <div class="cart-total"><span>Total:</span> <span id="cartTotal">S/0.00</span></div>
+                        <button class="checkout-btn" id="checkoutBtn" disabled>PROCEDER AL PAGO</button>
+                    </div>
+                 </div>
+             </div>
+        </div>
+    </header>
+
+    <nav class="main-nav" aria-label="Categorías principales">
+        <div class="container">
+             <ul class="main-menu" role="menubar">
+                 <li role="none"><a role="menuitem" href="/">Inicio</a></li>
+                 <li role="none" class="has-submenu"> <a role="menuitem" href="/productos" aria-haspopup="true" aria-expanded="false">Productos</a>
+                     <ul class="submenu" role="menu">
+                         <li role="none"><a role="menuitem" href="/productos?categoria=laptop">Laptop</a></li>
+                         <li role="none"><a role="menuitem" href="/productos?categoria=computadora">Computadora</a></li>
+                         <li role="none"><a role="menuitem" href="/productos?categoria=celular">Celular</a></li>
+                         <li role="none"><a role="menuitem" href="/productos?categoria=camaras">Cámaras de Seguridad</a></li>
+                         <li role="none"><a role="menuitem" href="/productos?categoria=accesorios">Accesorios</a></li>
+                         <li role="none"><a role="menuitem" href="/productos?categoria=gamer">Gamer</a></li>
+                     </ul>
+                 </li>
+                  <li role="none" class="has-submenu"> <a role="menuitem" href="/servicios" aria-haspopup="true" aria-expanded="false">Servicios</a>
+                     <ul class="submenu" role="menu">
+                           <li role="none"><a role="menuitem" href="/servicios?tipo=tecnico">Servicio Técnico</a></li>
+                           <li role="none"><a role="menuitem" href="/servicios?tipo=instalacion-camaras">Instalación de Cámaras</a></li>
+                           <li role="none"><a role="menuitem" href="/servicios?tipo=instalacion-redes">Instalación de Redes</a></li>
+                     </ul>
+                 </li>
+                 <li role="none"><a role="menuitem" href="#ofertas">Ofertas</a></li>
+                 <li role="none"><a role="menuitem" href="/contacto">Contacto</a></li>
+                 </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="promo-carousel" id="promo-carousel" aria-roledescription="Carrusel" aria-label="Promociones">
+            <div class="promo-carousel-inner">
+                <div class="promo-carousel-slide"><img src="imagenes/laptop asus.jpg" alt="Oferta en Laptops Core i7"></div>
+                 <div class="promo-carousel-slide"><img src="imagenes/ip cam.jpg" alt="Promoción Cámaras IP 4K"></div>
+                 <div class="promo-carousel-slide"><img src="imagenes/s25.png" alt="Nuevos Celulares Gama Alta"></div>
+                 <div class="promo-carousel-slide"><img src="imagenes/teclado promo.webp" alt="Accesorios Gamer con RGB"></div>
+            </div>
+            <button class="carousel-control carousel-prev" aria-label="Anterior">❮</button>
+            <button class="carousel-control carousel-next" aria-label="Siguiente">❯</button>
+            <div class="carousel-dots" id="promo-carousel-dots" role="tablist">
+                </div>
+        </section>
+
+        <section class="category-nav-section container">
+             <h2 class="visually-hidden">Navegación Rápida por Categorías</h2>
+             <div class="category-nav" id="category-nav-buttons">
+                <button data-category="all" class="active">Todas</button>
+                <button data-category="laptop">Laptops</button>
+                <button data-category="computadora">Computadoras</button>
+                <button data-category="celular">Celulares</button>
+                <button data-category="camaras">Cámaras</button>
+                <button data-category="accesorios">Accesorios</button>
+                <button data-category="gamer">Gamer</button>
+                <button data-category="servicios">Servicios</button>
+                </div>
+        </section>
+
+        <section id="ofertas" class="section-padding container" aria-labelledby="ofertas-title">
+            <h2 id="ofertas-title" class="section-title">🔥 Ofertas Destacadas</h2>
+            <div class="product-grid" id="ofertas-grid">
+                 <article class="product-card" data-product-id="kit-4-cam-dvr-1tb" data-category="ofertas camaras kits" data-brand="Hikvision" data-price="799">
+                     <span class="badge offer-tag">OFERTA</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="imagenes/kit cam 1tb.avif" alt="Kit 4 Cámaras Hikvision con DVR 1TB" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                             <h3 class="product-title"><a href="#" class="view-details-btn">Kit 4 Cámaras Seguridad Hikvision + DVR 1TB</a></h3>
+                             <p class="product-subtitle">Protege tu hogar o negocio con este kit completo Full HD y disco duro incluido.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/799</span> <span class="old-price">S/999</span> </div>
+                     </div>
+                     <div class="product-actions">
+                         <button class="action-button view-details-btn">Ver Detalles</button>
+                         <button class="action-button add-cart-btn" data-product-id="kit-4-cam-dvr-1tb">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "kit-4-cam-dvr-1tb", "title": "Kit 4 Cámaras Seguridad Hikvision + DVR 1TB", "price": 799, "oldPrice": 999, "img": "imagenes/kit cam 1tb.avif", "description": "Sistema completo HD para vigilancia. Incluye 4 cámaras (2 domo, 2 bala), DVR de 4 canales y disco duro de 1TB Purple especial para videovigilancia.", "specs": ["Cámaras: 4 x 1080p", "DVR: 4 Canales + 1 IP", "Disco: 1TB Vigilancia", "Visión nocturna: 20m"], "thumbnails": ["imagenes/kit cam 1tb.avif","imagenes/kit cam 1tb.avif","imagenes/kit cam 1tb.avif"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="ssd-480gb" data-category="ofertas laptops accesorios almacenamiento" data-brand="Kingston" data-price="219">
+                     <span class="badge offer-tag">-21%</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="imagenes/kingston 480.jpg" alt="Disco Sólido SSD 480GB en Oferta" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                             <h3 class="product-title"><a href="#" class="view-details-btn">Disco Sólido SSD 480GB Kingston/WD</a></h3>
+                             <p class="product-subtitle">Acelera tu PC o Laptop con esta unidad de estado sólido SATA III de alta velocidad.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/219</span> <span class="old-price">S/279</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="ssd-480gb">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "ssd-480gb", "title": "Disco Sólido SSD 480GB Kingston/WD", "price": 219, "oldPrice": 279, "img": "imagenes/kingston 480.jpg", "description": "Aumenta drásticamente la velocidad de arranque y carga de programas. Ideal para actualizar equipos antiguos.", "specs": ["Capacidad: 480GB", "Interfaz: SATA III 6Gb/s", "Velocidad R/W: ~500/450 MB/s", "Formato: 2.5 pulgadas"], "thumbnails": ["/api/placeholder/80/80?text=SSD+Oferta"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="mouse-gamer-rgb" data-category="ofertas gamer accesorios" data-brand="Logitech" data-price="149">
+                     <span class="badge offer-tag">OFERTA</span> <span class="badge gamer-badge">GAMER</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="imagenes/logitexh 203.jpg" alt="Mouse Gamer Logitech G203 RGB Oferta" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                             <h3 class="product-title"><a href="#" class="view-details-btn">Mouse Gamer Logitech G203 LIGHTSYNC RGB</a></h3>
+                             <p class="product-subtitle">Sensor preciso de 8000 DPI, 6 botones programables e iluminación RGB personalizable.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/149</span> <span class="old-price">S/199</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="mouse-gamer-rgb">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "mouse-gamer-rgb", "title": "Mouse Gamer Logitech G203 LIGHTSYNC RGB", "price": 149, "oldPrice": 199, "img": "imagenes/logitexh 203.jpg", "description": "Diseño clásico y cómodo con rendimiento para juegos. Personaliza la iluminación RGB y asigna comandos a sus 6 botones.", "specs": ["Sensor: Óptico 8000 DPI", "Botones: 6 programables", "Iluminación: LIGHTSYNC RGB", "Conexión: USB"], "thumbnails": ["/api/placeholder/80/80?text=G203+1","/api/placeholder/80/80?text=G203+2"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="laptop-lenovo-ideapad3" data-category="ofertas laptop oficina" data-brand="Lenovo" data-price="1999">
+                     <span class="badge offer-tag">CYBER</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="imagenes/lenovo ryzen 5.webp" alt="Laptop Lenovo IdeaPad 3 14 Ryzen 5 Oferta" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                             <h3 class="product-title"><a href="#" class="view-details-btn">Laptop Lenovo IdeaPad 3 14" Ryzen 5 8GB 512GB SSD</a></h3>
+                             <p class="product-subtitle">Portátil ligero y potente para productividad diaria con procesador AMD Ryzen.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/1999</span> <span class="old-price">S/2499</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="laptop-lenovo-ideapad3">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "laptop-lenovo-ideapad3", "title": "Laptop Lenovo IdeaPad 3 14\" Ryzen 5 8GB 512GB SSD", "price": 1999, "oldPrice": 2499, "img": "imagenes/lenovo ryzen 5.webp", "description": "Laptop delgada y liviana con pantalla Full HD de 14 pulgadas, procesador AMD Ryzen 5 5500U, 8GB RAM y rápido SSD de 512GB.", "specs": ["Pantalla: 14\" FHD", "Procesador: AMD Ryzen 5 5500U", "RAM: 8GB DDR4", "Almacenamiento: 512GB SSD NVMe", "OS: Windows 11 Home"], "thumbnails": ["/api/placeholder/80/80?text=IdeaPad+1","/api/placeholder/80/80?text=IdeaPad+2"]}</script>
+                 </article>
+                 </div>
+        </section>
+
+         <section id="productos" class="section-padding container" aria-labelledby="productos-title">
+            <h2 id="productos-title" class="section-title">Nuestros Productos</h2>
+             <div class="product-filter-sort-bar">
+                <span id="product-count-display">Mostrando 0 productos</span>
+                <div class="sort-controls">
+                    <label for="sortOptions">Ordenar por:</label>
+                    <select id="sortOptions">
+                        <option value="default">Relevancia</option>
+                        <option value="price-asc">Precio: Menor a Mayor</option>
+                        <option value="price-desc">Precio: Mayor a Menor</option>
+                        <option value="name-asc">Nombre: A-Z</option>
+                         <option value="name-desc">Nombre: Z-A</option>
+                    </select>
+                </div>
+             </div>
+            <div class="product-grid" id="productos-grid">
+                <article class="product-card" data-product-id="cam-domo-hd" data-category="camaras hd" data-brand="Hikvision" data-price="199" data-name="Cámara Domo HD 1080p Interior">
+                     <a href="#" class="product-image-link view-details-btn"> <img src="imagenes/camara domo in.jpg" alt="Cámara Domo HD 1080p Interior" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Cámara Domo HD 1080p Interior</a></h3>
+                            <p class="product-subtitle">Vigilancia discreta y de alta definición para interiores, con visión nocturna.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/199</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="cam-domo-hd">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "cam-domo-hd", "title": "Cámara Domo HD 1080p Interior", "price": 199, "img": "/api/placeholder/400/320?text=Cam+Domo+HD", "description": "Cámara tipo domo plástica HD 1080p con lente de 2.8mm, ideal para oficinas y hogares. Visión nocturna IR hasta 20 metros.", "specs": ["Resolución: 2MP (1920x1080)", "Lente: 2.8mm", "Visión IR: 20m", "Tecnología: 4 en 1 (TVI/AHD/CVI/CVBS)"], "thumbnails": ["/api/placeholder/80/80?text=Cam+Domo"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="laptop-hp-15" data-category="laptop oficina" data-brand="HP" data-price="2499" data-name="Laptop HP 15.6 Core i5">
+                     <span class="badge new-badge">NUEVO</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="imagenes/hp i5 8gb.webp" alt="Laptop HP 15.6 pulgadas Core i5" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Laptop HP 15.6" Core i5 8GB RAM 256GB SSD</a></h3>
+                            <p class="product-subtitle">Equipo portátil versátil para trabajo y estudio, con almacenamiento rápido SSD.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/2499</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="laptop-hp-15">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "laptop-hp-15", "title": "Laptop HP 15.6\" Core i5 8GB RAM 256GB SSD", "price": 2499, "img": "/api/placeholder/400/320?text=Laptop+HP+15", "description": "Laptop HP con pantalla de 15.6 pulgadas, procesador Intel Core i5, 8GB de memoria RAM y disco sólido de 256GB para un rendimiento ágil.", "specs": ["Pantalla: 15.6\" HD", "Procesador: Intel Core i5 (11va Gen)", "RAM: 8GB DDR4", "Almacenamiento: 256GB SSD NVMe", "OS: Windows 11 Home"], "thumbnails": ["/api/placeholder/80/80?text=Laptop+HP+1","/api/placeholder/80/80?text=Laptop+HP+2"]}</script>
+                 </article>
+                  <article class="product-card" data-product-id="pc-gamer-amd" data-category="computadora gamer" data-brand="AMD" data-price="3599" data-name="PC Gamer AMD Ryzen 5 RTX 3050">
+                     <span class="badge gamer-badge">GAMER</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="imagenes/pc ryzen 5 rtx30501.jpg" alt="PC Gamer AMD Ryzen 5 con RTX 3050" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">PC Gamer AMD Ryzen 5, RTX 3050, 16GB RAM</a></h3>
+                            <p class="product-subtitle">Computadora de escritorio ensamblada para gaming, con gráficos NVIDIA RTX.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/3599</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="pc-gamer-amd">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "pc-gamer-amd", "title": "PC Gamer AMD Ryzen 5, RTX 3050, 16GB RAM", "price": 3599, "img": "imagenes/pc ryzen 5 rtx3050.jpg", "description": "Potente PC gamer con procesador AMD Ryzen 5 5600G, tarjeta gráfica NVIDIA GeForce RTX 3050, 16GB RAM DDR4 y SSD de 500GB.", "specs": ["CPU: AMD Ryzen 5 5600G", "GPU: NVIDIA RTX 3050 8GB", "RAM: 16GB DDR4 3200MHz", "Almacenamiento: 500GB SSD NVMe", "Fuente: 600W 80+ Bronze"], "thumbnails": ["/api/placeholder/80/80?text=PC+Gamer+1","/api/placeholder/80/80?text=PC+Gamer+2"]}</script>
+                 </article>
+                  <article class="product-card" data-product-id="celular-xiaomi-12" data-category="celular smartphone" data-brand="Xiaomi" data-price="1899" data-name="Celular Xiaomi 12">
+                     <a href="#" class="product-image-link view-details-btn"> <img src="imagenes/xiomi 12 128.jpg" alt="Celular Xiaomi 12 128GB" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Celular Xiaomi 12 128GB / 8GB RAM</a></h3>
+                            <p class="product-subtitle">Smartphone de gama alta con excelente cámara y pantalla AMOLED fluida.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/1899</span> <span class="old-price">S/2199</span></div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="celular-xiaomi-12">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "celular-xiaomi-12", "title": "Celular Xiaomi 12 128GB / 8GB RAM", "price": 1899, "oldPrice": 2199, "img": "/api/placeholder/400/320?text=Xiaomi+12", "description": "Xiaomi 12 con pantalla AMOLED de 120Hz, procesador Snapdragon potente, cámara principal de 50MP y carga rápida.", "specs": ["Pantalla: 6.28\" AMOLED 120Hz", "Procesador: Snapdragon 8 Gen 1", "RAM: 8GB", "Almacenamiento: 128GB", "Cámara: 50MP + 13MP + 5MP", "Batería: 4500mAh"], "thumbnails": ["/api/placeholder/80/80?text=Xiaomi+1","/api/placeholder/80/80?text=Xiaomi+2"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="cam-bala-ip" data-category="camaras ip" data-brand="Dahua" data-price="259" data-name="Cámara IP Bala 2MP Exterior Dahua">
+                     <a href="#" class="product-image-link view-details-btn"> <img src="imagenes/cam dahua.jpg" alt="Cámara IP Bala 2MP Exterior" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Cámara IP Bala 2MP Exterior Dahua</a></h3>
+                            <p class="product-subtitle">Cámara de red para exteriores resistente, con calidad de imagen Full HD y PoE.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/259</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="cam-bala-ip">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "cam-bala-ip", "title": "Cámara IP Bala 2MP Exterior Dahua", "price": 259, "img": "/api/placeholder/400/320?text=Cam+Bala+IP", "description": "Cámara IP tipo bala Full HD 1080p para exteriores (IP67), con visión nocturna IR 30m y alimentación PoE.", "specs": ["Resolución: 2MP (1920x1080)", "Lente: 2.8mm", "Visión IR: 30m", "Protección: IP67", "Conexión: RJ45 (PoE)"], "thumbnails": ["/api/placeholder/80/80?text=Cam+Bala+IP"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="servicio-tecnico-pc" data-category="servicios" data-brand="Matrix" data-price="99" data-name="Servicio Técnico PC Laptop">
+                     <span class="badge service-badge">SERVICIO</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="/api/placeholder/300/200?text=Servicio+Tecnico" alt="Servicio Técnico PC/Laptop" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Servicio Técnico PC / Laptop</a></h3>
+                            <p class="product-subtitle">Diagnóstico y mantenimiento profesional para tu computadora o portátil.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">Desde S/99</span> </div> </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button reserve-btn" data-product-id="servicio-tecnico-pc">Consultar</button> </div>
+                     <script type="application/json" class="product-data">{"id": "servicio-tecnico-pc", "title": "Servicio Técnico PC / Laptop", "price": 99, "isService": true, "img": "/api/placeholder/400/320?text=Servicio+Tecnico", "description": "Ofrecemos diagnóstico, reparación de hardware, limpieza interna, formateo, instalación de software y optimización de rendimiento para PCs y Laptops.", "specs": ["Tipo: Servicio", "Alcance: Diagnóstico, Reparación, Mantenimiento", "Equipo: PC / Laptop", "Precio: Desde S/99 (Varía según servicio)"], "thumbnails": ["/api/placeholder/80/80?text=Servicio+PC"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="teclado-mecanico-rgb" data-category="gamer accesorios" data-brand="HyperX" data-price="349" data-name="Teclado Mecánico Gamer HyperX Alloy Origins Core RGB">
+                     <span class="badge gamer-badge">GAMER</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="/api/placeholder/300/200?text=Teclado+HyperX" alt="Teclado Mecánico Gamer HyperX Alloy Origins Core RGB" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Teclado Mecánico Gamer HyperX Alloy Origins Core RGB</a></h3>
+                            <p class="product-subtitle">Diseño TKL compacto, switches HyperX Red (lineales) e iluminación RGB radiante.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/349</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="teclado-mecanico-rgb">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "teclado-mecanico-rgb", "title": "Teclado Mecánico Gamer HyperX Alloy Origins Core RGB", "price": 349, "img": "/api/placeholder/400/320?text=Teclado+HyperX", "description": "Teclado mecánico TKL (sin pad numérico) con cuerpo de aluminio, switches mecánicos HyperX Red, N-Key Rollover y efectos de iluminación RGB personalizables.", "specs": ["Formato: TKL (Tenkeyless)", "Switches: HyperX Red (Lineal)", "Iluminación: RGB por tecla", "Material: Aluminio", "Conexión: USB-C Desmontable"], "thumbnails": ["/api/placeholder/80/80?text=Alloy+1","/api/placeholder/80/80?text=Alloy+2"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="monitor-curvo-samsung" data-category="gamer accesorios monitor" data-brand="Samsung" data-price="989" data-name="Monitor Curvo Samsung Odyssey G5 27">
+                     <span class="badge gamer-badge">GAMER</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="/api/placeholder/300/200?text=Monitor+Curvo+G5" alt="Monitor Curvo Gamer Samsung Odyssey G5 27 pulgadas QHD 144Hz" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Monitor Curvo Gamer Samsung Odyssey G5 27" QHD 144Hz</a></h3>
+                            <p class="product-subtitle">Inmersión total con curvatura 1000R, resolución QHD y tasa de refresco de 144Hz.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/989</span> <span class="old-price">S/1199</span></div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="monitor-curvo-samsung">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "monitor-curvo-samsung", "title": "Monitor Curvo Gamer Samsung Odyssey G5 27\" QHD 144Hz", "price": 989, "oldPrice": 1199, "img": "/api/placeholder/400/320?text=Monitor+Curvo+G5", "description": "Monitor gaming de 27 pulgadas con panel VA curvo (1000R), resolución QHD (2560x1440), 144Hz de tasa de refresco, 1ms de tiempo de respuesta y AMD FreeSync Premium.", "specs": ["Tamaño: 27 pulgadas", "Panel: VA Curvo (1000R)", "Resolución: QHD (2560x1440)", "Refresco: 144Hz", "Tiempo Respuesta: 1ms (MPRT)", "Tecnología: FreeSync Premium"], "thumbnails": ["/api/placeholder/80/80?text=G5+Monitor+1","/api/placeholder/80/80?text=G5+Monitor+2"]}</script>
+                 </article>
+                  <article class="product-card" data-product-id="router-tplink-ax10" data-category="accesorios redes" data-brand="TP-Link" data-price="299" data-name="Router TP-Link Archer AX10 Wi-Fi 6">
+                     <a href="#" class="product-image-link view-details-btn"> <img src="/api/placeholder/300/200?text=Router+AX10" alt="Router TP-Link Archer AX10 Wi-Fi 6" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Router TP-Link Archer AX10 Wi-Fi 6 AX1500</a></h3>
+                            <p class="product-subtitle">Experimenta la velocidad y eficiencia de Wi-Fi 6 para conectar más dispositivos.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/299</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="router-tplink-ax10">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "router-tplink-ax10", "title": "Router TP-Link Archer AX10 Wi-Fi 6 AX1500", "price": 299, "img": "/api/placeholder/400/320?text=Router+AX10", "description": "Router de doble banda con tecnología Wi-Fi 6 (802.11ax) para velocidades de hasta 1.5 Gbps, mayor capacidad y menor latencia. Ideal para streaming 4K y juegos online.", "specs": ["Estándar Wi-Fi: Wi-Fi 6 (802.11ax)", "Velocidad: AX1500 (1201 Mbps en 5 GHz + 300 Mbps en 2.4 GHz)", "Puertos: 1 WAN Gigabit + 4 LAN Gigabit", "Tecnologías: OFDMA, Beamforming"], "thumbnails": ["/api/placeholder/80/80?text=AX10+1","/api/placeholder/80/80?text=AX10+2"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="webcam-logitech-c920" data-category="accesorios camaras" data-brand="Logitech" data-price="289" data-name="Webcam Logitech C920s Pro HD">
+                     <a href="#" class="product-image-link view-details-btn"> <img src="/api/placeholder/300/200?text=Webcam+C920s" alt="Webcam Logitech C920s Pro HD" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Webcam Logitech C920s Pro HD</a></h3>
+                            <p class="product-subtitle">Videollamadas Full HD 1080p nítidas y fluidas, con tapa de privacidad integrada.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/289</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="webcam-logitech-c920">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "webcam-logitech-c920", "title": "Webcam Logitech C920s Pro HD", "price": 289, "img": "/api/placeholder/400/320?text=Webcam+C920s", "description": "Webcam Full HD 1080p a 30 fps con corrección de iluminación automática HD y dos micrófonos para sonido estéreo claro. Incluye tapa de obturador.", "specs": ["Resolución: Full HD 1080p / 30fps", "Enfoque: Automático", "Campo Visual: 78°", "Micrófonos: Estéreo Integrados", "Extra: Tapa de Privacidad"], "thumbnails": ["/api/placeholder/80/80?text=C920s+1"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="celular-samsung-a54" data-category="celular smartphone" data-brand="Samsung" data-price="1549" data-name="Celular Samsung Galaxy A54 5G">
+                     <span class="badge new-badge">NUEVO</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="/api/placeholder/300/200?text=Samsung+A54" alt="Celular Samsung Galaxy A54 5G 128GB" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Celular Samsung Galaxy A54 5G 128GB</a></h3>
+                            <p class="product-subtitle">Diseño elegante, pantalla Super AMOLED 120Hz y cámara versátil de 50MP.</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">S/1549</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button add-cart-btn" data-product-id="celular-samsung-a54">Añadir</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "celular-samsung-a54", "title": "Celular Samsung Galaxy A54 5G 128GB", "price": 1549, "img": "/api/placeholder/400/320?text=Samsung+A54", "description": "Smartphone Galaxy A54 con conectividad 5G, pantalla Super AMOLED de 6.4 pulgadas a 120Hz, 8GB RAM, 128GB almacenamiento y cámara principal de 50MP con OIS.", "specs": ["Pantalla: 6.4\" Super AMOLED 120Hz", "Procesador: Exynos 1380", "RAM: 8GB", "Almacenamiento: 128GB (expandible)", "Cámara: 50MP (OIS) + 12MP + 5MP", "Batería: 5000mAh"], "thumbnails": ["/api/placeholder/80/80?text=A54+1","/api/placeholder/80/80?text=A54+2"]}</script>
+                 </article>
+                 <article class="product-card" data-product-id="servicio-instalacion-camaras" data-category="servicios instalacion" data-brand="Matrix" data-price="249" data-name="Servicio Instalación Cámaras Seguridad">
+                     <span class="badge service-badge">SERVICIO</span>
+                     <a href="#" class="product-image-link view-details-btn"> <img src="/api/placeholder/300/200?text=Instalacion+Cam" alt="Servicio Instalación Cámaras Seguridad" loading="lazy"> </a>
+                     <div class="product-card-info">
+                         <div>
+                            <h3 class="product-title"><a href="#" class="view-details-btn">Servicio Instalación Cámaras Seguridad</a></h3>
+                            <p class="product-subtitle">Instalación profesional de tu kit de cámaras de seguridad (hasta 4 cámaras).</p>
+                         </div>
+                         <div class="product-price-container"> <span class="product-price">Desde S/249</span> </div>
+                     </div>
+                     <div class="product-actions">
+                          <button class="action-button view-details-btn">Ver Detalles</button>
+                          <button class="action-button reserve-btn" data-product-id="servicio-instalacion-camaras">Consultar</button>
+                     </div>
+                     <script type="application/json" class="product-data">{"id": "servicio-instalacion-camaras", "title": "Servicio Instalación Cámaras Seguridad", "price": 249, "isService": true, "img": "/api/placeholder/400/320?text=Instalacion+Cam", "description": "Servicio de instalación y configuración básica para kits de videovigilancia (DVR/NVR + hasta 4 cámaras). Incluye montaje, cableado (hasta 20m por cámara) y configuración inicial.", "specs": ["Tipo: Servicio", "Alcance: Instalación y Configuración", "Equipo: Kit CCTV (hasta 4 cámaras)", "Precio: Desde S/249 (No incluye materiales adicionales)"], "thumbnails": ["/api/placeholder/80/80?text=Inst+Cam+Serv"]}</script>
+                 </article>
+             </div>
+        </section>
+
+        <section class="sale-countdown-section container">
+            <h3>¡Últimas horas de Ofertas Cyber!</h3>
+             <div class="countdown-timer" id="countdown-timer-container">
+                <div class="time-block"><span class="time-value" data-unit="days">00</span><span class="time-label">Días</span></div>
+                 <div class="time-block"><span class="time-value" data-unit="hours">00</span><span class="time-label">Horas</span></div>
+                 <div class="time-block"><span class="time-value" data-unit="minutes">00</span><span class="time-label">Min</span></div>
+                 <div class="time-block"><span class="time-value" data-unit="seconds">00</span><span class="time-label">Seg</span></div>
+             </div>
+        </section>
+
+        <section id="servicios" class="services-section"> <div class="container">
+             <h2 class="section-title">Nuestros Servicios Adicionales</h2>
+              <div class="services-grid">
+                    <div class="service-card"> <div class="service-icon">🔧</div> <h3 class="service-title">Ensamblaje de PCs</h3> <p class="service-desc">Armamos la PC de tus sueños con los componentes que elijas.</p> </div>
+                     <div class="service-card"> <div class="service-icon">🛡️</div> <h3 class="service-title">Recuperación de Datos</h3> <p class="service-desc">Intentamos recuperar información valiosa de discos dañados.</p> </div>
+                     <div class="service-card"> <div class="service-icon">📶</div> <h3 class="service-title">Instalación de Redes</h3> <p class="service-desc">Configuramos redes cableadas y WiFi para hogar y oficina.</p> </div>
+                     <div class="service-card"> <div class="service-icon">💡</div> <h3 class="service-title">Asesoría Personalizada</h3> <p class="service-desc">Te ayudamos a encontrar la tecnología perfecta para ti.</p> </div>
+              </div>
+        </div> </section>
+
+        <section class="brands-section"> <div class="container">
+             <h2 class="section-title">Trabajamos con las Mejores Marcas</h2>
+              <div class="brand-logos">
+                    <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=HP" alt="HP Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=Lenovo" alt="Lenovo Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=Asus" alt="Asus Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=Intel" alt="Intel Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=AMD" alt="AMD Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=Hikvision" alt="Hikvision Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=Xiaomi" alt="Xiaomi Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=Kingston" alt="Kingston Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=Logitech" alt="Logitech Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=Samsung" alt="Samsung Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=TP-Link" alt="TP-Link Logo"></div>
+                     <div class="brand-logo-item"><img src="/api/placeholder/140/70?text=HyperX" alt="HyperX Logo"></div>
+              </div>
+        </div> </section>
+
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                 <div class="footer-column">
+                    <h3>Institucional</h3>
+                    <ul class="footer-menu">
+                        <li><a href="/nosotros">Sobre Nosotros</a></li>
+                        <li><a href="/tiendas">Nuestras Tiendas</a></li>
+                        <li><a href="/trabaja-con-nosotros">Trabaja con Nosotros</a></li>
+                        <li><a href="/terminos-y-condiciones">Términos y Condiciones</a></li>
+                        <li><a href="/politica-privacidad">Política de Privacidad</a></li>
+                    </ul>
+                 </div>
+                  <div class="footer-column">
+                    <h3>Atención al Cliente</h3>
+                    <ul class="footer-menu">
+                        <li><a href="/contacto">Contacto</a></li>
+                        <li><a href="/preguntas-frecuentes">Preguntas Frecuentes (FAQ)</a></li>
+                        <li><a href="/como-comprar">Cómo Comprar</a></li>
+                        <li><a href="/envios">Envíos y Entregas</a></li>
+                        <li><a href="/garantias">Garantías y Devoluciones</a></li>
+                    </ul>
+                 </div>
+                  <div class="footer-column">
+                    <h3>Mi Cuenta</h3>
+                    <ul class="footer-menu">
+                        <li><a href="/pedidos">Mis Pedidos</a></li>
+                        <li><a href="/deseos">Lista de Deseos</a></li>
+                    </ul>
+                 </div>
+                  <div class="footer-column">
+                    <h3>Contacto</h3>
+                    <address>
+                        Av. Garcilaso de la Vega 1348,<br>
+                        Tienda 1A-123, CyberPlaza,<br>
+                        Lima, Lima 15001, Perú<br>
+                        Tel: +51 1 456 7890<br> Email: ventas@matrix.com.pe
+                    </address>
+                    <div class="social-icons">
+                         <a href="#" target="_blank" aria-label="Facebook"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v2.385z"/></svg></a>
+                         <a href="#" target="_blank" aria-label="Instagram"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                         <a href="https://wa.me/5114567890?text=Hola%2C%20necesito%20ayuda." target="_blank" aria-label="Whatsapp"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg></a>
+                    </div>
+                 </div>
+                 </div>
+             <div class="footer-bottom">
+                &copy; 2025 Matrix Tecnología. Todos los derechos reservados. </div>
+         </div>
+    </footer>
+
+    <div class="modal-overlay" id="productModalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+        <div class="modal-content">
+            <button class="modal-close-btn" aria-label="Cerrar">&times;</button> <div class="modal-left">
+                <div class="modal-images">
+                    <div class="modal-main-img-container"><img id="modalMainImg" src="" alt="Imagen principal del producto"></div>
+                    <div class="modal-thumbnails" id="modalThumbnails"></div>
+                </div>
+            </div>
+            <div class="modal-right">
+                 <h2 class="modal-title" id="modalTitle"></h2>
+                 <div class="modal-price-container"><span class="modal-price" id="modalPrice"></span><span class="modal-old-price" id="modalOldPrice"></span></div>
+                 <div class="modal-description" id="modalDescription"></div>
+                 <div class="modal-specs"><h3>Especificaciones:</h3><div id="modalSpecs"></div></div>
+                 <div class="modal-quantity">
+                    <label for="modalQuantityInput" class="quantity-label">Cantidad:</label>
+                    <div class="quantity-control">
+                        <button class="quantity-btn decrease-qty-btn" aria-label="Disminuir cantidad">-</button>
+                        <input type="text" inputmode="numeric" class="quantity-input" id="modalQuantityInput" value="1" min="1" readonly aria-label="Cantidad de producto">
+                        <button class="quantity-btn increase-qty-btn" aria-label="Aumentar cantidad">+</button>
+                    </div>
+                 </div>
+                 <div class="modal-actions">
+                    <button class="modal-action-btn modal-add-to-cart-btn" id="modalAddToCartBtn">AÑADIR AL CARRITO</button>
+                    <button class="modal-action-btn modal-buy-now-btn">COMPRAR AHORA</button>
+                 </div>
+            </div>
+        </div>
+    </div>
+    <div id="productModalOverlay" class="modal-overlay hidden" aria-hidden="true">
+  <div class="modal-content">
+    <button class="modal-close-btn" aria-label="Cerrar">×</button>
+    <!-- contenido del modal aquí -->
+  </div>
+</div>
+<!-- MODAL DE DETALLES DE PRODUCTO -->
+<div id="productModalOverlay" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal-content animated faster" role="dialog" aria-modal="true">
+      <button class="modal-close-btn" aria-label="Cerrar">×</button>
+  
+      <h2 id="modalTitle" class="modal-title"></h2>
+  
+      <div class="modal-img-section">
+        <img id="modalMainImg" src="/api/placeholder/400/320?text=Cargando..." alt="Imagen del producto">
+        <ul id="modalThumbnails" class="thumbnail-list"></ul>
+      </div>
+  
+      <p id="modalDescription" class="modal-description"></p>
+  
+      <div id="modalSpecs" class="modal-specs"></div>
+  
+      <div class="modal-price-section">
+        <span id="modalPrice" class="modal-price">S/0.00</span>
+        <span id="modalOldPrice" class="old-price hidden">S/0.00</span>
+      </div>
+  
+      <div class="modal-qty-section">
+        <button class="decrease-qty-btn" aria-label="Disminuir cantidad">−</button>
+        <input id="modalQuantityInput" type="number" min="1" value="1" aria-label="Cantidad">
+        <button class="increase-qty-btn" aria-label="Aumentar cantidad">+</button>
+      </div>
+  
+      <button id="modalAddToCartBtn" class="action-button">AÑADIR AL CARRITO</button>
+    </div>
+  </div>
+
+    <a href="https://wa.me/5114567890?text=Hola%2C%20necesito%20ayuda%20con%20un%20producto." target="_blank" class="whatsapp-float" aria-label="Contactar por WhatsApp">
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+    </a>
+    <div class="notification-container" id="notification-container" aria-live="assertive"></div>
+
+    <script src="script.js" defer></script> </body>
+</html>
