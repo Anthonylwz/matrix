@@ -5,7 +5,7 @@ const KEY='ideas-personal-session:v1';
 export function staffSession(){
   try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.server===getServerKey()&&s.expires>Date.now()&&/^[a-f0-9]{64}$/.test(s.token)&&['asistencia','intranet'].includes(s.identity?.origen))return s;localStorage.removeItem(KEY);}catch{}return null;
 }
-export function forgetStaffSession(){localStorage.removeItem(KEY);try{window.AndroidNet?.clearSessionContext?.();}catch{}}
+export function forgetStaffSession(){localStorage.removeItem(KEY);try{localStorage.removeItem('ideas-staff-recent:v1');}catch{}try{window.AndroidNet?.clearSessionContext?.();}catch{}}
 export async function storeStaffSession(data){
   if(data?.tipo!=='personal'||!Number.isSafeInteger(data.identidad?.id)||data.identidad.id<1||!['asistencia','intranet'].includes(data.identidad?.origen)||typeof data.token_sesion!=='string'||!(/^[a-f0-9]{64}$/.test(data.token_sesion)))throw new Error('El servidor no identificó tu cuenta.');
   const server=getServerKey();
@@ -21,11 +21,12 @@ async function request(endpoint,body,{authenticated=false,signal}={}){
   try{
     const url=new URL(String(window.APP_API_URL||'../api/').replace(/\/$/,'')+'/'+endpoint,location.href).href;
     const response=await fetch(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify({...body,...(authenticated?{token_sesion:token}:{}),device_token:getDeviceId()})});
-    const result=await response.json();
+    let result;try{result=await response.json();}catch{throw Object.assign(new Error('El servidor no devolvió una respuesta válida.'),{status:response.status,invalidResponse:true});}
+    if(!result||typeof result!=='object')throw Object.assign(new Error('El servidor no devolvió una respuesta válida.'),{status:response.status,invalidResponse:true});
     if(server!==getServerKey()||(authenticated&&staffSession()?.token!==token))throw new Error('La cuenta o el servidor cambiaron durante la consulta.');
     if(!response.ok||result.success!==true){if(response.status===401&&authenticated)forgetStaffSession();throw Object.assign(new Error(result.message||'No se pudo completar la solicitud.'),{status:response.status});}
     return result.data;
-  }catch(e){if(e.name==='AbortError')throw new Error('La conexión tardó demasiado. Reintenta cuando tengas señal.');if(e instanceof TypeError)throw new Error('No se pudo conectar con el servidor.');throw e;}
+  }catch(e){if(e.name==='AbortError')throw Object.assign(new Error('La conexión tardó demasiado. Reintenta cuando tengas señal.'),{offline:true});if(e instanceof TypeError)throw Object.assign(new Error('No se pudo conectar con el servidor.'),{offline:true});throw e;}
   finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);}
 }
 export const unifiedLogin=(usuario,password,origen='automatico')=>request('acceso_app.php',{usuario,dni:usuario,password,origen});

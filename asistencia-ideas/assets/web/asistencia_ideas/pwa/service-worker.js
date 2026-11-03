@@ -1,5 +1,5 @@
 // Service Worker para PWA Asistencia Ideas
-const CACHE_VERSION = 'alumnos-4.1.1';
+const CACHE_VERSION = 'alumnos-4.2.0';
 const CACHE_STATIC = `asistencia-static-${CACHE_VERSION}`;
 const CACHE_DYNAMIC = `asistencia-dynamic-${CACHE_VERSION}`;
 
@@ -21,6 +21,7 @@ const STATIC_ASSETS = [
   "./js/install.js",
   "./js/jsQR.min.js",
   "./js/location.js",
+  "./js/login-assist.js",
   "./js/notifications.js",
   "./js/photo.js",
   "./js/push.js",
@@ -58,6 +59,8 @@ const STATIC_ASSETS = [
   "./pages/scanner.js",
   "./css/student-app.css?v=23",
   "./css/theme-motion.css?v=2",
+  "./css/enhancements.css?v=1",
+  "./css/staff-app.css?v=2",
 
 
 

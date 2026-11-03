@@ -1,7 +1,7 @@
 // Utilidades generales y componentes UI rápidos
 
 // Versión visible en Perfil. Mantener igual a CACHE_VERSION de service-worker.js
-export const APP_VERSION = '4.1.1';
+export const APP_VERSION = '4.2.0';
 
 // Selector DOM abreviado
 export const $ = (selector, parent = document) => parent.querySelector(selector);

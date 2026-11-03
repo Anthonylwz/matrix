@@ -5,6 +5,7 @@ import { icon } from '../js/icons.js';
 import { loginService, checkServerStatus } from '../js/api.js';
 import { validateDni, saveSession, getDeviceId, describeDevice, rememberPassword, unlockOffline, getUser, accountDni, clearSession, markNeedsOnline } from '../js/auth.js';
 import { getServerKey } from '../js/server-context.js';
+import { rememberLastAccount } from '../js/login-assist.js';
 
 const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -273,9 +274,19 @@ export function init() {
     }
     // La bóveda fue verificada como trabajador: no reutilizar su contraseña para detectar otro rol.
     const selectedAccount=document.getElementById('login-account-type');
-    if(selectedAccount){selectedAccount.value='trabajador';selectedAccount.dispatchEvent(new Event('change'));}
+    if(selectedAccount){selectedAccount.dataset.auto='1';if(selectedAccount.value!=='trabajador')selectedAccount.dataset.autoWorker='1';selectedAccount.value='trabajador';selectedAccount.dispatchEvent(new Event('change'));}
     r.password='';
     form.requestSubmit();
+  }
+
+  // Si la app pasó sola al acceso de trabajador (detección automática), al terminar vuelve a "Detectar mi cuenta".
+  function restoreAutomaticType() {
+    const selected = document.getElementById('login-account-type');
+    if (!selected || selected.dataset.autoWorker !== '1') return;
+    delete selected.dataset.autoWorker;
+    selected.dataset.auto = '1';
+    selected.value = 'automatico';
+    selected.dispatchEvent(new Event('change'));
   }
 
   // Envío del formulario de Login
@@ -283,6 +294,11 @@ export function init() {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if(submitBtn?.disabled || biometricPending)return;
+      try { await submitLogin(); } finally { restoreAutomaticType(); }
+    });
+  }
+
+  async function submitLogin() {
 
       const dni = dniInput ? dniInput.value.trim() : '';
       const pass = passInput ? passInput.value : '';
@@ -369,6 +385,7 @@ export function init() {
             return;
           }
           if (passInput) passInput.value = '';
+          rememberLastAccount({ tipo: 'trabajador', usuario: dni, nombre: response.data.nombres || response.data.nombre || '' });
 
           // Primera vez con contraseña en un celular con huella: se ofrece activarla (una vez)
           if (!conHuella && biometricAvailable() && !biometricEnabled() && !wasOffered(dni)) {
@@ -415,7 +432,6 @@ export function init() {
       } finally {
         setLoading(false);
       }
-    });
   }
 
   function showError(msg) {

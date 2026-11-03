@@ -8,6 +8,7 @@ import { studentSettingsMarkup, studentProfileDataMarkup, bindStudentSettings, e
 import { icon, rowIcon } from './icons.js';
 import { ICON_CHEVRON, APP_VERSION, showToast, showActionSheet } from './utils.js';
 import { useProfileServerControls, studentServerInfo, openStudentServerSettings } from './student-server.js';
+import { consumeDetectedAccount } from './login-assist.js';
 import { normalizeSearch, matchesSearch, sortClasses, shouldAutoRefresh, academicPeriods, defaultPeriod, primaryEnrollment, inPeriod, nextWeeklyClass, currentEnrollmentSchedule, paymentState, paymentTotals, paymentNet } from './student-model.js';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cap='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5-10-5Z"/><path d="M6 11v6c3 3 9 3 12 0v-6M22 9v7"/></svg>';
@@ -112,6 +113,7 @@ export function initStudentApp(){
   window.addEventListener('offline',()=>{offline=true;render();});
   huella=data?.huella||null;
   if(data){lastSuccess=cachedAt||Date.now();render();schedulePoll();checkChanges();}else{render();refresh();}
+  const detected=consumeDetectedAccount();if(detected)setTimeout(()=>showToast('Cuenta detectada: '+detected,'success'),350);
 }
 function render(force=false){
   if(!force&&editing())return;
@@ -179,11 +181,22 @@ function evaluations(){
   const linked=notes.some(n=>String(n.curso||'').trim());
   const legacy=notes.some(n=>!String(n.curso||'').trim());
   const caption=linked?'Notas publicadas por curso y parcial.':'Evaluaciones de tu matrícula.';
-  return `<p class="sa-caption">${caption}${legacy?' Las evaluaciones sin curso asociado se muestran tal como están registradas en la intranet.':''}</p>${academicGroups(notes).map(group=>`${groupHeading(group)}<div class="ios-card ios-card--flush list-group--icons">${[...group.items].sort((a,b)=>String(a.curso||'').localeCompare(String(b.curso||''),'es')||Number(a.parcial)-Number(b.parcial)||String(a.fecha).localeCompare(String(b.fecha))).map(n=>{
+  return `<p class="sa-caption">${caption}${legacy?' Las evaluaciones sin curso asociado se muestran tal como están registradas en la intranet.':''}</p>${academicGroups(notes).map(group=>`${groupHeading(group)}${gradeSummary(group.items)}<div class="ios-card ios-card--flush list-group--icons">${[...group.items].sort((a,b)=>String(a.curso||'').localeCompare(String(b.curso||''),'es')||Number(a.parcial)-Number(b.parcial)||String(a.fecha).localeCompare(String(b.fecha))).map(n=>{
     const hasGrade=n.nota!==null&&n.nota!==undefined&&String(n.nota).trim()!==''&&Number.isFinite(Number(n.nota));
     const course=String(n.curso||'').trim();
     return `<div class="list-row">${rowIcon('chart','purple')}<span class="list-row__main"><span>${course?esc(course):'Evaluación '+esc(n.parcial)}</span><span class="list-row__sub">${esc([course?'Parcial '+n.parcial:'',fmtDate(n.fecha)].filter(Boolean).join(' · '))}</span></span><span class="list-row__end sa-grade">${hasGrade?esc(Number(n.nota).toLocaleString('es-PE',{maximumFractionDigits:2})):'Pendiente'}${hasGrade?'<small>/20</small>':''}</span></div>`;
   }).join('')}</div>`).join('')}`;
+}
+
+// Resumen de notas del periodo: promedio simple de las notas publicadas (escala /20) y promedio por curso.
+function gradeSummary(items){
+  const graded=items.filter(n=>n.nota!==null&&n.nota!==undefined&&String(n.nota).trim()!==''&&Number.isFinite(Number(n.nota)));
+  if(!graded.length)return '';
+  const avg=list=>list.reduce((sum,n)=>sum+Number(n.nota),0)/list.length;
+  const fmt=value=>value.toLocaleString('es-PE',{minimumFractionDigits:1,maximumFractionDigits:1});
+  const byCourse=new Map();graded.forEach(n=>{const key=String(n.curso||'').trim();if(!key)return;if(!byCourse.has(key))byCourse.set(key,[]);byCourse.get(key).push(n);});
+  const best=graded.reduce((a,b)=>Number(b.nota)>Number(a.nota)?b:a);
+  return `<section class="ios-card sa-grade-summary" aria-label="Resumen de notas"><div class="sa-grade-summary__main"><span class="sa-eyebrow">PROMEDIO DE NOTAS PUBLICADAS</span><strong>${esc(fmt(avg(graded)))}<small>/20</small></strong><p>${graded.length} nota${graded.length>1?'s':''} publicada${graded.length>1?'s':''}${byCourse.size?` · ${byCourse.size} curso${byCourse.size>1?'s':''}`:''} · Nota más alta: ${esc(Number(best.nota).toLocaleString('es-PE',{maximumFractionDigits:2}))}${String(best.curso||'').trim()?' en '+esc(best.curso):''}</p></div>${byCourse.size>1?`<ul class="sa-grade-courses">${[...byCourse.entries()].sort((a,b)=>a[0].localeCompare(b[0],'es')).map(([course,list])=>`<li><span>${esc(course)}</span><b>${esc(fmt(avg(list)))}</b></li>`).join('')}</ul>`:''}<small class="sa-caption">Promedio simple de referencia. Tu promedio oficial es el que publica la intranet.</small></section>`;
 }
 
 function academicGroups(items){

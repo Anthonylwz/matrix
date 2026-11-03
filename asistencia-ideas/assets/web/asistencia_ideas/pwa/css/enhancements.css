@@ -1,0 +1,141 @@
+/* =========================================================
+   Mejoras v4.2 — login con detección de cuenta en segundo plano
+   (los paneles de cada rol tienen sus propios estilos).
+   ========================================================= */
+
+/* Indicador "Reconocemos tu cuenta automáticamente" */
+.login-detect {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm, 12px);
+  background: rgba(var(--accent-rgb), .09);
+  color: var(--text-secondary);
+  font-size: var(--fs-footnote);
+  line-height: 1.4;
+}
+.login-detect > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.login-detect > span { flex: 1; min-width: 0; }
+.login-detect strong { color: var(--text-primary); font-weight: 650; }
+.login-detect.is-manual { background: var(--fill); }
+.login-detect__reset {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.login-notice { margin: -6px 0 14px; }
+
+/* Selector manual: oculto por defecto, se abre desde "Elegir tipo de cuenta manualmente" */
+.login-role-manual[hidden] { display: none; }
+.login-role-manual { animation: login-reveal .22s ease both; }
+.login-role-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: var(--fs-footnote);
+  cursor: pointer;
+}
+.login-role-toggle svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.login-role-toggle:disabled { opacity: .5; }
+
+/* Botón principal mientras se reconoce la cuenta */
+#btn-submit-login.is-detecting { position: relative; overflow: hidden; }
+#btn-submit-login.is-detecting::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, .22) 50%, transparent 80%);
+  transform: translateX(-100%);
+  animation: login-sweep 1.2s ease-in-out infinite;
+}
+#btn-submit-login.is-detecting #btn-text { display: inline-block !important; margin-right: 8px; }
+
+/* Varias cuentas con los mismos datos */
+.login-choices { border: 0; display: grid; gap: 10px; margin: 16px 0 0; padding: 0; animation: login-reveal .25s ease both; }
+.login-choices legend { font-size: var(--fs-footnote); color: var(--text-secondary); margin-bottom: 10px; line-height: 1.45; }
+.login-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md, 14px);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease;
+}
+.login-choice:active { transform: scale(.98); }
+.login-choice:focus-visible, .login-choice:hover { border-color: var(--accent); }
+.login-choice > svg { width: 18px; height: 18px; color: var(--text-muted); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.login-choice__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(var(--accent-rgb), .14);
+  color: var(--accent);
+}
+.login-choice__icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.login-choice__text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.login-choice__text strong { font-size: var(--fs-callout); font-weight: 650; }
+.login-choice__text small { font-size: var(--fs-caption1); color: var(--text-secondary); }
+
+@keyframes login-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes login-sweep { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .login-role-manual, .login-choices { animation: none; }
+  #btn-submit-login.is-detecting::after { animation: none; display: none; }
+}
+
+/* ── Alumno: resumen de notas ── */
+.sa-grade-summary { padding: 16px 18px; margin: 0 0 12px; }
+.sa-grade-summary__main strong { display: block; font-size: 32px; letter-spacing: -.6px; margin: 4px 0 2px; }
+.sa-grade-summary__main strong small { font-size: 15px; font-weight: 500; color: var(--text-secondary); margin-left: 3px; }
+.sa-grade-summary__main p { margin: 0 0 8px; font-size: var(--fs-footnote); color: var(--text-secondary); line-height: 1.45; }
+.sa-grade-courses { list-style: none; margin: 4px 0 10px; padding: 0; display: grid; gap: 6px; }
+.sa-grade-courses li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; border-radius: 10px; background: var(--fill); font-size: var(--fs-footnote); }
+.sa-grade-courses b { font-variant-numeric: tabular-nums; }
+
+/* ── Trabajador: puntualidad semanal ── */
+.week-punctuality { margin-top: var(--space-2); padding: 14px 16px; border-radius: 16px; background: var(--bg-surface); }
+.week-punctuality[hidden] { display: none; }
+.week-punctuality__head { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--fs-footnote); color: var(--text-secondary); }
+.week-punctuality__head strong { font-size: var(--fs-title3); color: var(--text-primary); }
+.week-punctuality__bar { height: 8px; border-radius: 999px; background: var(--fill); overflow: hidden; margin: 8px 0 6px; }
+.week-punctuality__bar span { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--success); transition: width .6s ease; }
+.week-punctuality__bar span[data-tone="mid"] { background: var(--warning); }
+.week-punctuality__bar span[data-tone="low"] { background: var(--danger); }
+.week-punctuality small { font-size: var(--fs-caption1); color: var(--text-muted); }
+
+/* "¿No eres …? Usar otra cuenta" bajo el saludo */
+.login-switch { display: block; margin: -14px auto 18px; padding: 6px 10px; border: 0; background: transparent; color: var(--accent); font: inherit; font-size: var(--fs-footnote); font-weight: 600; cursor: pointer; }

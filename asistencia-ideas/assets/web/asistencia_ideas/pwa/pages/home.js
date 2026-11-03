@@ -123,6 +123,11 @@ export function render(container) {
           <span class="stat-tile__label">Horas</span>
         </div>
       </div>
+      <div id="home-week-punctuality" class="week-punctuality" hidden>
+        <div class="week-punctuality__head"><span>Puntualidad</span><strong id="home-week-punctuality-value">–</strong></div>
+        <div class="week-punctuality__bar"><span id="home-week-punctuality-bar"></span></div>
+        <small id="home-week-punctuality-text"></small>
+      </div>
 
       <!-- Solicitudes -->
       <div class="section-head">
@@ -310,6 +315,18 @@ export async function init() {
       countUp($('#home-week-days'), r.total_asistencias ?? list.filter((x) => x.hora_entrada).length);
       countUp($('#home-week-late'), late);
       set('#home-week-hours', String(r.horas_trabajadas || '0:00').replace(/^0(\d:)/, '$1'));
+      // Puntualidad: días con entrada a tiempo sobre los días con asistencia
+      const days = Number(r.total_asistencias ?? list.filter((x) => x.hora_entrada).length) || 0;
+      const box = $('#home-week-punctuality');
+      if (box && days > 0) {
+        const onTime = Math.max(0, days - (Number(late) || 0));
+        const pct = Math.round((onTime * 100) / days);
+        set('#home-week-punctuality-value', `${pct}%`);
+        set('#home-week-punctuality-text', `${onTime} de ${days} día${days === 1 ? '' : 's'} con entrada a tiempo${pct === 100 ? ' · ¡Excelente!' : ''}`);
+        const bar = $('#home-week-punctuality-bar');
+        if (bar) { bar.style.width = `${pct}%`; bar.dataset.tone = pct >= 90 ? 'good' : pct >= 70 ? 'mid' : 'low'; }
+        box.hidden = false;
+      }
     } catch (_) {}
   }
 
