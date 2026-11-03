@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!-- Arranque limpio: el botón nativo "Configurar servidor" se oculta antes de cargar los módulos
+       (Android lo muestra en cada carga de página) y, con sesión de alumno, se cubre el shell hasta dibujar la app. -->
+  <script>
+    try { var nb = window.AndroidNet; if (nb && nb.setLoginServerControlsVisible) nb.setLoginServerControlsVisible(true); } catch (e) {}
+    try {
+      var su = JSON.parse(localStorage.getItem('asistencia_user') || 'null');
+      if (su && su.tipo === 'alumno' && localStorage.getItem('asistencia_token')) document.documentElement.classList.add('sa-boot');
+      var personal = JSON.parse(localStorage.getItem('ideas-personal-session:v1') || 'null');
+      if (personal && personal.expires > Date.now() && personal.token && personal.identity) document.documentElement.classList.add('sa-boot');
+    } catch (e) {}
+  </script>
+  <style>
+    #sa-splash{display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:var(--bg-app,#000);transition:opacity .25s ease}
+    html.sa-boot #sa-splash{display:flex}
+    #sa-splash.is-leaving{opacity:0;pointer-events:none}
+    html.sa-boot #bottom-nav,html.sa-boot #ios-install-banner{visibility:hidden}
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>IDEAS Alumnos</title>
+  <meta name="application-version" content="4.1.1">
+
+  <!-- Configuración PWA estándar -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <!-- Tema elegido en Perfil (Claro/Oscuro): se aplica antes de dibujar para que no parpadee -->
+  <script>
+    try {
+      var tema = localStorage.getItem('asistencia_tema');
+      if (tema === 'light' || tema === 'dark') {
+        document.documentElement.setAttribute('data-theme', tema);
+        document.documentElement.style.colorScheme = tema;
+      }
+    } catch (e) {}
+  </script>
+
+  <!-- Configuración específica para iPhone / iOS Safari -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Asistencia">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
+  <!-- Carga en paralelo: fuente y módulos se piden de una vez, sin esperas encadenadas -->
+  <link rel="preload" href="fonts/inter-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="modulepreload" href="js/app.js">
+  <link rel="modulepreload" href="js/utils.js">
+  <link rel="modulepreload" href="js/sheet.js">
+  <link rel="modulepreload" href="js/router.js">
+  <link rel="modulepreload" href="js/auth.js">
+  <link rel="modulepreload" href="js/server-context.js">
+  <link rel="modulepreload" href="js/db.js">
+  <link rel="modulepreload" href="js/api.js">
+  <link rel="modulepreload" href="js/sync.js">
+  <link rel="modulepreload" href="js/install.js">
+  <link rel="modulepreload" href="js/icons.js">
+  <link rel="modulepreload" href="js/security.js">
+  <link rel="modulepreload" href="js/scanner.js">
+  <link rel="modulepreload" href="js/location.js">
+  <link rel="modulepreload" href="js/theme.js">
+  <link rel="modulepreload" href="js/biometric.js">
+  <link rel="modulepreload" href="js/viewer.js">
+  <link rel="modulepreload" href="js/photo.js">
+  <link rel="modulepreload" href="js/push.js">
+  <link rel="modulepreload" href="js/notifications.js">
+  <link rel="modulepreload" href="pages/login.js">
+  <link rel="modulepreload" href="pages/home.js">
+  <link rel="modulepreload" href="pages/scanner.js">
+  <link rel="modulepreload" href="pages/history.js">
+  <link rel="modulepreload" href="pages/requests.js">
+  <link rel="modulepreload" href="pages/permissions.js">
+  <link rel="modulepreload" href="pages/corrections.js">
+  <link rel="modulepreload" href="pages/profile.js">
+  <link rel="modulepreload" href="pages/notifications.js">
+
+  <!-- Estilos base nativos iOS -->
+  <link rel="stylesheet" href="css/app.css?v=4.1.1">
+  <link rel="stylesheet" href="../public/ideas-season.css?v=11">
+  <script defer src="../public/ideas-season.js?v=17"></script>
+<script>window.IDEAS_STUDENT_APP=true;</script><link rel="stylesheet" href="css/student-app.css?v=23">
+<link rel="stylesheet" href="css/theme-motion.css?v=2">
+</head>
+<body>
+  <div id="sa-splash" role="status" aria-label="Cargando"><span class="spinner"></span></div>
+  <div id="app">
+    <!-- Contenedor flotante de avisos Toast -->
+    <div id="toast-container"></div>
+
+    <!-- Escenario de pantallas: cada pantalla es una .view con su propia barra -->
+    <main id="app-view"></main>
+
+    <!-- Barra de pestañas flotante (íconos Lucide; el relleno suave aparece en la pestaña activa) -->
+    <nav class="ios-tab-bar" id="bottom-nav" aria-label="Secciones">
+      <a href="#home" class="tab-item active" data-route="home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect class="duo" x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 14V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="m16 20 2 2 4-4"/></svg>
+        <span>Hoy</span>
+      </a>
+      <a href="#history" class="tab-item" data-route="history">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle class="duo" cx="12" cy="12" r="9"/><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+        <span>Historial</span>
+      </a>
+      <a href="#requests" class="tab-item" data-route="requests">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect class="duo" x="4" y="4" width="16" height="18" rx="2"/><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>
+        <span>Solicitudes</span>
+      </a>
+      <a href="#profile" class="tab-item" data-route="profile">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle class="duo" cx="12" cy="12" r="10"/><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg>
+        <span>Perfil</span>
+      </a>
+    </nav>
+
+    <!-- Guía de instalación para Safari en iPhone -->
+    <div class="ios-install-banner" id="ios-install-banner" role="status">
+      <div class="install-banner__head">
+        <strong class="install-banner__title">Instalar Asistencia Ideas</strong>
+        <button type="button" id="btn-close-install" class="icon-btn" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <p class="install-banner__text">
+        Para una experiencia de aplicación completa: pulsa
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+          <polyline points="16 6 12 2 8 6"/>
+          <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+        <strong>Compartir</strong> y luego <strong>"Agregar a pantalla de inicio"</strong>.
+      </p>
+    </div>
+  </div>
+
+  <!-- Entrada JavaScript Principal -->
+  <script type="module" src="js/entry.js"></script>
+
+  <!-- Respaldo: si los módulos no cargan (sin conexión y sin copia guardada), aviso en vez de pantalla negra -->
+  <script>
+    setTimeout(function () {
+      var stage = document.getElementById('app-view');
+      if (!stage || stage.querySelector('.view')) return;
+      stage.innerHTML = '<section class="view view--bare"><div class="view__scroll"><div class="view__content">'
+        + '<div class="page" style="padding:48px 24px;text-align:center">'
+        + '<h1 style="font-size:22px;margin-bottom:8px">No se pudo abrir la app</h1>'
+        + '<p style="opacity:.7;margin-bottom:24px">Conéctate a internet una vez para que la app quede guardada en el celular y vuelve a intentarlo.</p>'
+        + '<button type="button" class="ios-btn ios-btn-primary" onclick="location.reload()">Reintentar</button>'
+        + '</div></div></div></section>';
+    }, 10000);
+  </script>
+</body>
+</html>

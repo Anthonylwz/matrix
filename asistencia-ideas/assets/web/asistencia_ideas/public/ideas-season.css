@@ -1,0 +1,35 @@
+.ideas-bat-layer{position:fixed;inset:0;z-index:1200;pointer-events:none!important;overflow:hidden;contain:strict;color:#14151b}
+.ideas-bat{position:absolute;aspect-ratio:2;opacity:.7;pointer-events:none!important;left:0;top:0;will-change:transform}
+.ideas-bat-wings{display:block;position:relative;width:100%;height:100%}
+.ideas-bat-part{position:absolute;inset:0;background:url('img/halloween-bat.svg?v=2') center/contain no-repeat;backface-visibility:hidden}
+.ideas-bat-left{clip-path:inset(0 54% 0 0);transform-origin:46% 44%;animation:ideas-bat-left-flap var(--flap-duration,.8s) ease-in-out var(--flight-delay,0s) infinite}
+.ideas-bat-right{clip-path:inset(0 0 0 54%);transform-origin:54% 44%;animation:ideas-bat-right-flap var(--flap-duration,.8s) ease-in-out var(--flight-delay,0s) infinite}
+.ideas-bat-body{clip-path:inset(0 42%);z-index:1}
+.ideas-bat[hidden]{display:none}
+@keyframes ideas-bat-left-flap{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(11deg)}}
+@keyframes ideas-bat-right-flap{0%,100%{transform:rotate(9deg)}50%{transform:rotate(-11deg)}}
+.ideas-season-paused .ideas-bat-part{animation-play-state:paused}
+/* Modo oscuro: dibujo ya aclarado (antes un filtro que obligaba a redibujar cada cuadro) */
+[data-theme="dark"] .ideas-bat-part{background-image:url('img/halloween-bat-dark.svg?v=1')}
+.ideas-october .topbar{box-shadow:inset 0 2px 0 rgba(191,112,32,.4)}
+.ideas-october .brand-kicker,.ideas-october .topbar-kicker{color:#a15a21}
+[data-theme="dark"].ideas-october .brand-kicker,[data-theme="dark"].ideas-october .topbar-kicker{color:#e4aa6e}
+.ideas-october .sidebar-brand{border-bottom:1px solid rgba(191,112,32,.22)}
+.ideas-season-label{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:5px 9px;border:1px solid rgba(191,112,32,.25);border-radius:999px;background:rgba(191,112,32,.08);color:#92501b;font-size:10px;font-weight:700;letter-spacing:.02em}
+.ideas-season-label::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+[data-theme="dark"] .ideas-season-label{color:#e4aa6e}
+.ideas-official-logo{display:block;width:160px;height:auto;aspect-ratio:201/79;object-fit:contain;border-radius:10px;background:#292c32;padding:8px;box-sizing:content-box;box-shadow:none;border:0;max-width:100%}
+.ideas-brand-holder{width:auto!important;height:auto!important;flex-shrink:0;background:transparent!important;padding:0!important}
+.sidebar-brand .brand-logo{flex-direction:column;align-items:flex-start;gap:10px}
+.sidebar-brand .brand-text .brand-name{font-size:14px}
+.login-icon.ideas-brand-holder{width:fit-content!important}
+.login-header .ideas-official-logo{width:190px}
+.ideas-october .screen-shell{border-top-color:#b56d27}
+.ideas-logout-dialog{width:min(420px,calc(100% - 32px));box-sizing:border-box;margin:auto;padding:24px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink-950)}
+.ideas-logout-dialog::backdrop{background:rgba(0,0,0,.45)}
+.ideas-logout-dialog h2{margin:0 0 10px;font-size:20px}
+.ideas-logout-dialog p{color:var(--ink-600);line-height:1.5}
+.ideas-logout-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+@media(prefers-color-scheme:dark){html:not([data-theme="light"]) .ideas-bat-part{background-image:url('img/halloween-bat-dark.svg?v=1')}}
+@media(prefers-reduced-motion:reduce){.ideas-bat-part{animation:none}}
+@media print{.ideas-bat-layer{display:none}}

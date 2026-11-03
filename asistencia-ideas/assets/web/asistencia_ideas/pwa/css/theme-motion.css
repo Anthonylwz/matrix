@@ -1,0 +1,40 @@
+/* Fundido uniforme: la imagen anterior permanece opaca para evitar un destello
+   del fondo al mezclar el tema nuevo. No cambia posiciones ni escala el contenido. */
+html.theme-blending::view-transition-group(root) { animation: none; }
+html.theme-blending::view-transition-old(root) {
+  animation: none;
+  opacity: 1;
+  mix-blend-mode: normal;
+}
+html.theme-blending::view-transition-new(root) {
+  animation: ideas-theme-in 700ms cubic-bezier(.45, 0, .2, 1) both;
+  mix-blend-mode: normal;
+}
+@keyframes ideas-theme-in { from { opacity: 0; } to { opacity: 1; } }
+/* Capturar la selección ya colocada: evita que salte al terminar el fundido. */
+html.theme-blending .segmented__thumb,
+html.theme-blending .tab-indicator { transition: none !important; }
+html.theme-blending::view-transition { pointer-events: none; }
+
+/* Alternativa para navegadores sin View Transitions. Solo durante el cambio. */
+html.theme-colors, html.theme-colors *,
+html.theme-colors *::before, html.theme-colors *::after {
+  transition: background-color 700ms cubic-bezier(.45, 0, .2, 1),
+    color 700ms cubic-bezier(.45, 0, .2, 1),
+    border-color 700ms cubic-bezier(.45, 0, .2, 1),
+    box-shadow 700ms cubic-bezier(.45, 0, .2, 1),
+    fill 700ms cubic-bezier(.45, 0, .2, 1),
+    stroke 700ms cubic-bezier(.45, 0, .2, 1) !important;
+}
+/* Mantener el deslizamiento de pestañas, segmentos e interruptores en el fallback. */
+html.theme-colors :is(.segmented__thumb,.tab-indicator),
+html.theme-colors .ios-switch::after {
+  transition: background-color 700ms ease, box-shadow 700ms ease,
+    transform 280ms cubic-bezier(.2,.8,.2,1), opacity 180ms ease !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.theme-blending::view-transition-old(root),
+  html.theme-blending::view-transition-new(root) { animation: none; }
+  html.theme-colors, html.theme-colors *,
+  html.theme-colors *::before, html.theme-colors *::after { transition: none !important; }
+}
