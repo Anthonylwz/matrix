@@ -1,5 +1,5 @@
 // Service Worker para PWA Asistencia Ideas
-const CACHE_VERSION = 'ideas-4.2.3-navidad-r1';
+const CACHE_VERSION = 'ideas-4.2.4-navidad-r1';
 const CACHE_STATIC = `asistencia-static-${CACHE_VERSION}`;
 const CACHE_DYNAMIC = `asistencia-dynamic-${CACHE_VERSION}`;
 
@@ -15,7 +15,7 @@ const STATIC_ASSETS = [
   './js/personal-web-login.js',
   './pages/contacts.js',
   './js/staff-app.js',
-  './css/staff-app.css?v=4.2.3',
+  './css/staff-app.css?v=4.2.4',
   './js/student-push.js',
   './js/worker-contact.js',
   './js/student-web-login.js',
@@ -41,9 +41,11 @@ const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './css/app.css?v=4.2.3',
+  './css/app.css?v=4.2.4',
   './js/app.js',
   './js/api.js',
+  './js/net-retry.js',
+  './js/connection-test.js',
   './js/auth.js',
   './js/db.js',
   './js/security.js',

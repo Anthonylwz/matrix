@@ -88,6 +88,7 @@ export function render(container) {
           <span id="server-dot" class="status-dot"></span>
           <span id="server-status-text">Comprobando conexión…</span>
         </span>
+        <button type="button" id="btn-net-test" class="login__nettest">Probar conexión</button>
         <span class="login__version">Instituto IDEAS · v${APP_VERSION}</span>
       </div>
     </div>
@@ -107,6 +108,9 @@ export function init() {
   const btnSpinner = $('#btn-spinner');
   const serverDot = $('#server-dot');
   const serverText = $('#server-status-text');
+  $('#btn-net-test')?.addEventListener('click', () => {
+    import('../js/connection-test.js').then((m) => m.openConnectionTest()).catch(() => showToast('No se pudo abrir la prueba de conexión.', 'warning'));
+  });
 
   // DNI del trabajador vinculado precargado: solo falta la contraseña
   if (dniInput && accountDni() && !dniInput.value) dniInput.value = accountDni();

@@ -5012,3 +5012,32 @@ button.cal-day:active { transform: scale(.92); }
 
 .phone-chat{color:var(--accent);text-decoration:underline;text-underline-offset:4px;display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere}
 .contacts-search{display:flex;gap:8px;margin:10px 0 20px}.contacts-search input{flex:1;min-width:0}.contacts-search button{width:auto}.contacts-phone{display:block;font-size:14px}.contacts-pages{display:flex;align-items:center;gap:12px;justify-content:center}.contacts-pages button{width:auto;font-size:13px}
+
+/* Prueba de conexión (Perfil y pantalla de ingreso) */
+.net-test .sheet-hint { margin-bottom: 12px; }
+.net-test__nets { margin: 4px 0 8px; }
+.net-test__nets .segmented__item { min-height: 40px; font-size: var(--fs-subhead); }
+.net-test__nets .segmented__item:disabled { opacity: .55; }
+.net-test__detected { min-height: 1.4em; }
+.net-test__bar { height: 4px; margin: 14px 0 0; border-radius: 2px; background: var(--fill); overflow: hidden; }
+.net-test__bar[hidden] { display: none; }
+.net-test__bar > span { display: block; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left center; transition: transform .25s ease-out; }
+.net-test__status { margin: 10px 0 12px; min-height: 1.4em; }
+.net-test__status:empty { margin: 4px 0; min-height: 0; }
+.net-test__card { margin-bottom: 12px; }
+.net-test__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.net-test__net { color: var(--text-secondary); font-size: var(--fs-footnote); font-weight: 600; }
+.net-test__summary { margin: 0 0 12px; color: var(--text-secondary); font-size: var(--fs-footnote); line-height: 1.4; }
+.net-test__summary--end { margin: 12px 0 0; }
+.net-test .kv-row { align-items: baseline; }
+.net-test .kv-row__label { min-width: 0; overflow-wrap: anywhere; }
+.net-test .kv-row__value { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.net-test__notes { margin: 12px 0 0; padding-left: 18px; color: var(--text-secondary); font-size: var(--fs-footnote); line-height: 1.4; }
+.net-test__notes li + li { margin-top: 4px; }
+.net-test__next { margin: 0 0 12px; }
+.net-test__clip { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.net-test > .ios-btn + .ios-btn, .net-test [data-net-copy] { margin-top: 4px; }
+.login__nettest { min-height: 44px; padding: 0 12px; border: 0; background: none; color: var(--accent); font: inherit; font-size: var(--fs-footnote); font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.login__nettest:active { opacity: .6; }
+.login__nettest:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+@media (prefers-reduced-motion: reduce) { .net-test__bar > span { transition: none; } }

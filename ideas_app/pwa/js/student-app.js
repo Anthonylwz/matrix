@@ -9,6 +9,9 @@ import { icon, rowIcon } from './icons.js';
 import { ICON_CHEVRON, APP_VERSION, showToast, showActionSheet } from './utils.js';
 import { useProfileServerControls, studentServerInfo, openStudentServerSettings } from './student-server.js';
 import { normalizeSearch, matchesSearch, sortClasses, shouldAutoRefresh, academicPeriods, defaultPeriod, primaryEnrollment, inPeriod, nextWeeklyClass, currentEnrollmentSchedule, paymentState, paymentTotals, paymentNet } from './student-model.js';
+// Prueba de conexión: el módulo se descarga solo al abrirla.
+let netTest=null;
+function openNetTest(){import('./connection-test.js').then(m=>{netTest=m;m.openConnectionTest();}).catch(()=>showToast('No se pudo abrir la prueba de conexión.','warning'));}
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cap='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 9 10-5 10 5-10 5-10-5Z"/><path d="M6 11v6c3 3 9 3 12 0v-6M22 9v7"/></svg>';
 const book='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6c-3-3-7-3-10-2v15c3-1 7-1 10 2 3-3 7-3 10-2V4c-3-1-7-1-10 2Zm0 0v15"/></svg>';
@@ -103,7 +106,7 @@ export function initStudentApp(){
   period=defaultPeriod(data);
   const ui=loadStudentUi();
   if(ui){if(['cursos','matriculas','horario','evaluaciones'].includes(ui.segment))segment=ui.segment;if(ui.period==='*'||(ui.period&&academicPeriods(data).includes(ui.period)))period=ui.period;}
-  window.__androidBack=()=>{if(handleIntranetQrBack()||handleStudentSettingsBack())return 'handled';if(route()!=='home'){location.hash='#home';return 'handled';}return 'exit';};
+  window.__androidBack=()=>{if(netTest?.handleConnectionTestBack()||handleIntranetQrBack()||handleStudentSettingsBack())return 'handled';if(route()!=='home'){location.hash='#home';return 'handled';}return 'exit';};
   const applyHashSegment=()=>{const hash=location.hash.slice(1).split('?')[0];if(hash==='enrollments')segment='matriculas';else if(hash==='schedule')segment='horario';};
   applyHashSegment();
   window.addEventListener('hashchange',()=>{applyHashSegment();render(true);document.querySelector('.student-view h1')?.focus({preventScroll:true});});
@@ -143,6 +146,7 @@ function render(force=false){
   view.querySelectorAll('[data-study-segment]').forEach(button=>button.addEventListener('click',()=>{segment=button.dataset.studySegment;render();}));
   if(key==='home')view.querySelectorAll('a[href="#studies"],a[href="#enrollments"],a[href="#schedule"],a[href="#pagos"]').forEach(link=>link.addEventListener('click',()=>{period=link.getAttribute('href')==='#pagos'?'*':defaultPeriod(data);if(link.getAttribute('href')==='#studies')segment='cursos';scheduleDay='all';scrollPositions.clear();lastScreen='';}));
   view.querySelector('#student-logout')?.addEventListener('click',confirmLogout);
+  view.querySelector('#student-net-test')?.addEventListener('click',openNetTest);
   view.querySelector('#student-server-settings')?.addEventListener('click',()=>{try{openStudentServerSettings();}catch(error){showToast(error.message||'No se pudo abrir la configuración del servidor.','warning');}});
   bindAttendance(view,{onIdle:idle,onCalendar:()=>render(true),onSync:()=>syncMarks(true),onQueued:()=>{showToast('Sin conexión: tu marca quedó guardada y se enviará sola al volver la red.','warning',5000);render(true);},onMarked:result=>{showToast(result.ya_registrada?'Tu asistencia de esta clase ya estaba registrada.':`Asistencia registrada: ${result.curso} (${result.estado==='tardanza'?'tardanza':'presente'})`,result.estado==='tardanza'?'warning':'success');refresh({silent:true});}});
   bindStudentPushControls(view);
@@ -198,7 +202,7 @@ function schedule(){
 }
 function appMarkup(){
   const server=studentServerInfo();
-  return `<div class="list-header">Aplicación</div><div class="ios-card ios-card--flush list-group--icons">${server?`<button type="button" id="student-server-settings" class="list-row" aria-haspopup="dialog">${rowIcon('server','teal')}<span class="list-row__main"><span>Servidor</span><span class="list-row__sub">${esc(server.label)}</span></span><span class="list-row__end">${ICON_CHEVRON}</span></button>`:''}<div class="list-row">${rowIcon('info','gray')}<span class="list-row__main">Versión</span><span class="list-row__end tabular">${esc(APP_VERSION)}</span></div></div>`;
+  return `<div class="list-header">Aplicación</div><div class="ios-card ios-card--flush list-group--icons">${server?`<button type="button" id="student-server-settings" class="list-row" aria-haspopup="dialog">${rowIcon('server','teal')}<span class="list-row__main"><span>Servidor</span><span class="list-row__sub">${esc(server.label)}</span></span><span class="list-row__end">${ICON_CHEVRON}</span></button>`:''}<button type="button" id="student-net-test" class="list-row" aria-haspopup="dialog">${rowIcon('wifi','blue')}<span class="list-row__main"><span>Probar conexión</span><span class="list-row__sub">Compara Wi-Fi y datos móviles</span></span><span class="list-row__end">${ICON_CHEVRON}</span></button><div class="list-row">${rowIcon('info','gray')}<span class="list-row__main">Versión</span><span class="list-row__end tabular">${esc(APP_VERSION)}</span></div></div>`;
 }
 function profile(){
   if(!data){const session=studentSession(),name=session?.nombre||'Estudiante';return `<div class="profile-head"><span class="avatar avatar--initials sa-avatar">${esc(initials(name))}</span><h2 class="profile-head__name">${esc(name)}</h2><p class="profile-head__sub">${session?.dni?'DNI '+esc(session.dni):'Estudiante · Instituto IDEAS'}</p></div><div class="ios-card"><p>Conecta con tu intranet para consultar y editar tus datos personales. Puedes revisar el servidor o cerrar sesión desde aquí.</p></div>${studentWebLoginMarkup()}${studentPushSettingsMarkup()}${appMarkup()}${logoutMarkup()}`;}

@@ -31,7 +31,7 @@ const median = (a) => { const s = [...a].sort((x, y) => x - y); return s[Math.fl
         if (sessionStorage.getItem('s')) return; sessionStorage.setItem('s', 1); localStorage.clear(); localStorage.setItem('ideas-navidad-musica', 'off');
         if (role === 'admin') localStorage.setItem('ideas-personal-session:v1', JSON.stringify({ identity: { id: 7, nombre: 'M', rol: 'administrador', origen: 'asistencia' }, token: TOKEN, server: KEY, expires: Date.now() + 3600e3 }));
         if (role === 'alumno') { localStorage.setItem('asistencia_user', JSON.stringify({ tipo: 'alumno', id: 'alumno_42', alumno_id: 42, dni: '33333333', nombre: 'Carlos M', server_key: KEY })); localStorage.setItem('asistencia_token', TOKEN); localStorage.setItem('ideas-student-cache', JSON.stringify({ savedAt: Date.now(), server_key: KEY, alumno_id: 42, data: student })); }
-        if (role === 'trabajador') { localStorage.setItem('asistencia_user', JSON.stringify(worker)); localStorage.setItem('asistencia_token', TOKEN); }
+        if (role === 'trabajador') { localStorage.setItem('asistencia_user', JSON.stringify({ ...worker, server_key: KEY })); localStorage.setItem('asistencia_token', TOKEN); }
       }, { role, KEY, TOKEN, worker, student });
       const cdp = await ctx.newCDPSession(page);
       await cdp.send('Emulation.setCPUThrottlingRate', { rate: CPU });

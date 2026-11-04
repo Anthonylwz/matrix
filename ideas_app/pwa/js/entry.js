@@ -1,3 +1,5 @@
+// Reintento de consultas de lectura tras un corte de red: se carga antes que todo lo demás.
+import './net-retry.js';
 import { staffSession, unifiedLogin, storeStaffSession } from './staff-api.js';
 import { accountDni } from './auth.js';
 import { getServerKey } from './server-context.js';
