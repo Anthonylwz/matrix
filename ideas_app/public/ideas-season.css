@@ -420,6 +420,14 @@ html[data-ideas-viento="1"] .ideas-bg-snow>.ideas-flake{animation-duration:calc(
 
 /* Guirnalda bajo la barra superior (en su propio espacio, antes del título grande) */
 .ideas-garland--top{margin:2px -6px 0;z-index:1}
+/* Espacio reservado desde el inicio (clase del documento), así los adornos no mueven nada al aparecer. */
+html.ideas-navidad .view__scroll>.large-title{margin-top:16px}
+.view__scroll>.ideas-garland--top{position:absolute;left:10px;right:10px;margin:0;top:calc(var(--safe-top,0px) + var(--nav-height,44px) + 2px)}
+html.ideas-navidad .hero{padding-top:calc(var(--space-5,20px) + 8px)}
+html.ideas-navidad .profile-head:has(>.avatar,>.avatar-edit){padding-top:calc(var(--space-2,8px) + 18px)}
+html.ideas-navidad .profile-head:has(>.avatar,>.avatar-edit)>:is(.avatar,.avatar-edit){margin-bottom:calc(var(--space-3,12px) + 16px);position:relative;z-index:1}
+html.ideas-navidad .profile-head:has(>.sa-avatar){padding-top:calc(var(--space-2,8px) + 26px)}
+html.ideas-navidad .profile-head:has(>.sa-avatar)>.sa-avatar{margin-bottom:calc(var(--space-3,12px) + 24px)}
 .ideas-garland--top path{stroke:#2f4a3c}
 html[data-theme="dark"] .ideas-garland--top path{stroke:#9cc2ae}
 @media (prefers-color-scheme:dark){html:not([data-theme="light"]) .ideas-garland--top path{stroke:#9cc2ae}}
@@ -448,6 +456,11 @@ html[data-theme="dark"] .ideas-tabbar-frost{--ideas-frost-art-tab:url("data:imag
 .ideas-penguin-hop{display:block;width:100%;height:100%;animation:ideas-penguin-hop 5.3s ease-out infinite}
 @keyframes ideas-penguin-hop{0%,80%,100%{transform:translateY(0)}86%{transform:translateY(-7px)}91%{transform:translateY(0)}94%{transform:translateY(-2px)}97%{transform:translateY(0)}}
 
+/* Adornos de la pantalla que sale: ocultos durante el cambio (el navegador no calcula estilos dentro) */
+.ideas-hidden{display:none!important}
+/* Fundido breve al colocar adornos en una pantalla nueva (sin efecto al terminar: no queda animación viva) */
+.ideas-enter{animation:ideas-fade-in .45s ease-out backwards}
+@keyframes ideas-fade-in{from{opacity:0}}
 /* Aparición suave al encender el Modo Navidad (solo contenedores sin animación propia) */
 html[data-ideas-entrada] :is(.ideas-xmas-scene,.ideas-avatar-decor,.ideas-hero-decor,.ideas-page-footer,.ideas-garland,.ideas-login-scene){animation:ideas-appear .9s cubic-bezier(.2,.8,.2,1) both}
 @keyframes ideas-appear{from{opacity:0;transform:translateY(6px) scale(.985)}}

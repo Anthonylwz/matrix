@@ -132,7 +132,7 @@ function render(force=false){
   </div></div></div>`;
   saveStudentUi({segment,period});
   const scroller=view.querySelector('.view__scroll'),bar=view.querySelector('.nav-bar');
-  try{window.ideasSeasonDecorate?.();}catch{}scroller.scrollTop=scrollPositions.get(screen)||0;
+  const restoreTop=scrollPositions.get(screen)||0;try{window.ideasSeasonDecorate?.(restoreTop>0);}catch{}scroller.scrollTop=restoreTop;
   const updateBar=()=>{bar.classList.toggle('is-scrolled',scroller.scrollTop>2);bar.classList.toggle('is-collapsed',scroller.scrollTop>58);};updateBar();
   scroller.addEventListener('scroll',updateBar,{passive:true});
   view.querySelector('h1')?.setAttribute('tabindex','-1');

@@ -178,7 +178,7 @@
     setClass(hero, 'ideas-hero-decorated');
     if (hero.querySelector(':scope > .ideas-hero-decor')) return;
     const layer = document.createElement('span');
-    layer.className = 'ideas-hero-decor';
+    layer.className = 'ideas-hero-decor ideas-enter';
     layer.setAttribute(DECOR, '');
     layer.setAttribute('aria-hidden', 'true');
     // La guirnalda vive en el relleno superior (20 px) y la nieve, detrás del texto.
@@ -193,7 +193,7 @@
     if (layer && !measure) return;
     if (!layer) {
       layer = document.createElement('span');
-      layer.className = 'ideas-avatar-decor';
+      layer.className = 'ideas-avatar-decor ideas-enter';
       layer.setAttribute(DECOR, '');
       layer.setAttribute('aria-hidden', 'true');
       // Aro de luces detrás de la foto, con un hueco abajo a la derecha para el botón de cámara.
@@ -227,7 +227,7 @@
   function decorateHome(page) {
     if (page.querySelector(':scope > .ideas-xmas-scene')) return;
     const scene = document.createElement('section');
-    scene.className = 'ideas-xmas-scene';
+    scene.className = 'ideas-xmas-scene ideas-enter';
     scene.setAttribute(DECOR, '');
     scene.setAttribute('aria-hidden', 'true');
     // Capas de atrás hacia adelante: cielo (aurora, estrellas, luna, estrella fugaz), trineo,
@@ -245,6 +245,7 @@
     if (note) note.before(scene); else page.append(scene);
   }
   function decorate() {
+    document.querySelectorAll('.ideas-hidden').forEach((el) => { if (!el.closest('.view--leaving')) setClass(el, 'ideas-hidden', false); });
     document.querySelectorAll('.hero').forEach(decorateHero);
     document.querySelectorAll('.profile-head').forEach(decorateProfile);
     document.querySelectorAll('.page').forEach((page) => { if (page.querySelector(':scope > .hero')) decorateHome(page); });
@@ -255,7 +256,7 @@
     // márgenes) y entre la barra superior y la de pestañas, para no obligarlas a recalcular su desenfoque.
     document.querySelectorAll('#app-view > .view').forEach((view) => {
       if (view.querySelector(':scope > .ideas-bg-snow')) return;
-      view.insertAdjacentHTML('afterbegin', `<div class="ideas-bg-snow" ${DECOR} aria-hidden="true">${snow(14, Math.round(innerHeight * 0.95))}<span class="ideas-gust-layer"></span></div>`);
+      view.insertAdjacentHTML('afterbegin', `<div class="ideas-bg-snow ideas-enter" ${DECOR} aria-hidden="true">${snow(14, Math.round(innerHeight * 0.95))}<span class="ideas-gust-layer"></span></div>`);
     });
     // Guirnalda bajo la barra superior: ocupa su propio espacio antes del título grande.
     document.querySelectorAll('.view__scroll > .large-title').forEach((title) => {
@@ -291,7 +292,7 @@
     // Pie nevado (sección nueva al final) en las pantallas sin escena navideña.
     document.querySelectorAll('.view .view__content > .page').forEach((page) => {
       if (page.querySelector(':scope > .hero, :scope > .ideas-page-footer') || page.closest('.staff-skeleton') || page.querySelector('.staff-skeleton,.login')) return;
-      page.insertAdjacentHTML('beforeend', `<div class="ideas-page-footer" ${DECOR} aria-hidden="true"><span class="ideas-scene-snow">${snow(6, 76)}</span><span class="ideas-lamp-glow"></span>${lamp}<span class="ideas-footer-drift"></span><span class="ideas-penguin"><span class="ideas-penguin-turn"><span class="ideas-penguin-face"><span class="ideas-penguin-hop"><span class="ideas-penguin-waddle">${penguin}${layer('ideas-penguin-wing', '<path d="M4.2 13q-3 4-1 8 2.4-1 2.6-4.4Z" fill="#1c262d"/>', '0 0 22 26')}</span></span></span></span></span>${tree('ideas-tree--f1')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--f')}${tree('ideas-tree--f2')}</div>`);
+      page.insertAdjacentHTML('beforeend', `<div class="ideas-page-footer ideas-enter" ${DECOR} aria-hidden="true"><span class="ideas-scene-snow">${snow(6, 76)}</span><span class="ideas-lamp-glow"></span>${lamp}<span class="ideas-footer-drift"></span><span class="ideas-penguin"><span class="ideas-penguin-turn"><span class="ideas-penguin-face"><span class="ideas-penguin-hop"><span class="ideas-penguin-waddle">${penguin}${layer('ideas-penguin-wing', '<path d="M4.2 13q-3 4-1 8 2.4-1 2.6-4.4Z" fill="#1c262d"/>', '0 0 22 26')}</span></span></span></span></span>${tree('ideas-tree--f1')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--f')}${tree('ideas-tree--f2')}</div>`);
     });
     // Copo que gira junto al título «Modo Navidad» (alumnos, personal y trabajadores).
     document.querySelectorAll('[data-ideas-season-toggle], #toggle-temporada').forEach((input) => {
@@ -485,6 +486,7 @@
   // ── Ciclo de vida ───────────────────────────────────────────────────────────
   function update() {
     if (!document.body) return;
+    setClass(document.documentElement, 'ideas-navidad', enabled());
     const sync = (input, checked, disabled) => { if (checked !== null && input.checked !== checked) input.checked = checked; if (input.disabled !== disabled) input.disabled = disabled; };
     document.querySelectorAll('[data-ideas-season-toggle]').forEach((input) => sync(input, enabled(), read('ideas-temporada-global') === 'off'));
     document.querySelectorAll('[data-ideas-christmas-music]').forEach((input) => sync(input, read('ideas-navidad-musica') !== 'off', !enabled()));
@@ -522,20 +524,37 @@
   }, { passive: true });
   window.addEventListener('ideas:temporada', update);
   window.addEventListener('storage', update);
-  window.addEventListener('hashchange', update);
+  // Antes de que la app cambie de pantalla (esta escucha se registra antes que la del enrutador): los adornos de la
+  // pantalla actual se ocultan. Así el recálculo de estilos que fuerza la transición no recorre cientos de nodos
+  // decorativos; la pantalla nueva recibe los suyos en el siguiente momento libre.
+  const LEAVING = '#app-view > .view :is(.ideas-bg-snow,.ideas-xmas-scene,.ideas-page-footer,.ideas-hero-decor,.ideas-avatar-decor,.ideas-garland--top)';
+  window.addEventListener('hashchange', () => {
+    document.querySelectorAll(LEAVING).forEach((el) => setClass(el, 'ideas-hidden'));
+    if (!queued) { queued = true; requestAnimationFrame(() => setTimeout(scheduleIdleUpdate, 0)); }
+  });
   document.addEventListener('visibilitychange', update);
   window.addEventListener('pagehide', stopMusic);
   window.addEventListener('pageshow', update);
+  const idle = window.requestIdleCallback ? (fn) => requestIdleCallback(fn, { timeout: 500 }) : (fn) => setTimeout(fn, 60);
+  function scheduleIdleUpdate() {
+    // Durante la transición del enrutador (pantalla saliente aún presente) se espera a que termine.
+    if (document.querySelector('#app-view > .view--leaving')) { setTimeout(scheduleIdleUpdate, 90); return; }
+    idle(() => { queued = false; update(); });
+  }
   // Las apps vuelven a dibujar sus pantallas: se reponen los adornos sin reaccionar a los propios.
   const ours = (node) => node.nodeType !== 1 || node.hasAttribute?.(DECOR) || Boolean(node.closest?.(`[${DECOR}]`));
   let queued = false;
   new MutationObserver((records) => {
     const root = document.documentElement, body = document.body;
     if (records.every((r) => ours(r.target) || (r.type === 'attributes' && r.target !== root && r.target !== body) || (r.type === 'childList' && [...r.addedNodes, ...r.removedNodes].every(ours)))) return;
-    if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; update(); }); }
+    // Primero se pinta el contenido y termina la transición entre pantallas; los adornos llegan en el siguiente
+    // momento libre del procesador (el espacio ya está reservado, así que nada se mueve).
+    if (!queued) { queued = true; requestAnimationFrame(() => setTimeout(scheduleIdleUpdate, 0)); }
   }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'data-temporada', 'data-movimiento'] });
   // Las apps llaman a esto justo después de redibujar una pantalla y ANTES de restaurar el desplazamiento:
   // así los adornos que reservan espacio ya están puestos y el contenido no salta.
-  window.ideasSeasonDecorate = () => { try { if (enabled()) decorate(); } catch {} };
+  // Con needed=false (pantalla nueva desde arriba) no hace nada: los adornos llegan tras el primer pintado.
+  window.ideasSeasonDecorate = (needed = true) => { try { if (needed && enabled()) decorate(); } catch {} };
+  try { setClass(document.documentElement, 'ideas-navidad', enabled()); } catch {}
   update();
 })();

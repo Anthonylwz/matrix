@@ -44,7 +44,7 @@ function content(title,body){
  root.querySelector('.staff-refresh')?.addEventListener('click',event=>{event.currentTarget.classList.add('is-spinning');event.currentTarget.disabled=true;render({force:true,silent:QUIET_ROUTES.includes(route()),manual:true});});
  const scroller=root.querySelector('.view__scroll'),bar=root.querySelector('.nav-bar');
  // Adornos de temporada antes de restaurar la posición (no hace saltar el contenido).
- try{window.ideasSeasonDecorate?.();}catch{}
+ try{window.ideasSeasonDecorate?.(previousTop>0);}catch{}
  const paintBar=()=>{bar.classList.toggle('is-scrolled',scroller.scrollTop>2);bar.classList.toggle('is-collapsed',scroller.scrollTop>58);};
  if(scroller&&previousTop){scroller.scrollTop=previousTop;paintBar();}
  scroller?.addEventListener('scroll',paintBar,{passive:true});

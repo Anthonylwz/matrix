@@ -21,7 +21,7 @@
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>IDEAS Alumnos</title>
-  <meta name="application-version" content="4.2.2">
+  <meta name="application-version" content="4.2.3">
 
   <!-- Configuración PWA estándar -->
   <link rel="manifest" href="manifest.json">
@@ -50,44 +50,37 @@
 
   <!-- Carga en paralelo: fuente y módulos se piden de una vez, sin esperas encadenadas -->
   <link rel="preload" href="fonts/inter-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="modulepreload" href="js/app.js">
-  <link rel="modulepreload" href="js/utils.js">
-  <link rel="modulepreload" href="js/sheet.js">
-  <link rel="modulepreload" href="js/router.js">
-  <link rel="modulepreload" href="js/auth.js">
-  <link rel="modulepreload" href="js/server-context.js">
-  <link rel="modulepreload" href="js/db.js">
-  <link rel="modulepreload" href="js/api.js">
-  <link rel="modulepreload" href="js/sync.js">
-  <link rel="modulepreload" href="js/install.js">
-  <link rel="modulepreload" href="js/icons.js">
-  <link rel="modulepreload" href="js/security.js">
-  <link rel="modulepreload" href="js/scanner.js">
-  <link rel="modulepreload" href="js/location.js">
-  <link rel="modulepreload" href="js/theme.js">
-  <link rel="modulepreload" href="js/biometric.js">
-  <link rel="modulepreload" href="js/viewer.js">
-  <link rel="modulepreload" href="js/photo.js">
-  <link rel="modulepreload" href="js/push.js">
-  <link rel="modulepreload" href="js/notifications.js">
-  <link rel="modulepreload" href="pages/login.js">
-  <link rel="modulepreload" href="pages/home.js">
-  <link rel="modulepreload" href="pages/scanner.js">
-  <link rel="modulepreload" href="pages/history.js">
-  <link rel="modulepreload" href="pages/requests.js">
-  <link rel="modulepreload" href="pages/permissions.js">
-  <link rel="modulepreload" href="pages/corrections.js">
-  <link rel="modulepreload" href="pages/profile.js">
-  <link rel="modulepreload" href="pages/notifications.js">
-
-  <link rel="modulepreload" href="js/staff-app.js">
+  <!-- Precarga según la cuenta guardada: cada perfil descarga y compila solo sus módulos
+       (personal ~17, alumno ~23; trabajador y pantalla de ingreso, los de la app de asistencia). -->
+  <script>
+    (function () {
+      var kind = 'trabajador';
+      try {
+        var personal = JSON.parse(localStorage.getItem('ideas-personal-session:v1') || 'null');
+        var user = JSON.parse(localStorage.getItem('asistencia_user') || 'null');
+        if (personal && personal.expires > Date.now() && personal.token) kind = 'personal';
+        else if (user && user.tipo === 'alumno' && localStorage.getItem('asistencia_token')) kind = 'alumno';
+      } catch (e) {}
+      var lists = {
+        personal: ['j:entry.js','j:staff-api.js','j:auth.js','j:server-context.js','j:student-api.js','j:student-server.js','j:icons.js','j:biometric.js','j:app-runtime.js','j:db.js','j:theme.js','j:utils.js','j:sheet.js','j:scanner.js','j:staff-app.js','j:contact-links.js','j:personal-web-login.js'],
+        alumno: ['j:entry.js','j:staff-api.js','j:auth.js','j:server-context.js','j:student-api.js','j:student-server.js','j:icons.js','j:biometric.js','j:app-runtime.js','j:db.js','j:theme.js','j:utils.js','j:sheet.js','j:scanner.js','j:student-app.js','j:student-push.js','j:student-web-login.js','j:student-biometric.js','j:student-settings.js','j:student-attendance.js','j:student-model.js','j:student-mark-queue.js','j:location.js'],
+        trabajador: ['j:app.js','j:utils.js','j:sheet.js','j:router.js','j:auth.js','j:server-context.js','j:db.js','j:api.js','j:sync.js','j:install.js','j:icons.js','j:security.js','j:scanner.js','j:location.js','j:theme.js','j:biometric.js','j:viewer.js','j:photo.js','j:push.js','j:notifications.js','p:login.js','p:home.js','p:scanner.js','p:history.js','p:requests.js','p:permissions.js','p:corrections.js','p:profile.js','p:notifications.js']
+      };
+      lists[kind].forEach(function (h) {
+        var l = document.createElement('link');
+        l.rel = 'modulepreload';
+        l.href = h.replace('j:', 'js/').replace('p:', 'pages/');
+        document.head.appendChild(l);
+      });
+    })();
+  </script>
   <!-- Estilos base nativos iOS -->
-  <link rel="stylesheet" href="css/app.css?v=4.2.2">
-  <link rel="stylesheet" href="../public/ideas-season.css?v=30">
-  <script defer src="../public/ideas-season.js?v=30"></script>
+  <link rel="stylesheet" href="css/app.css?v=4.2.3">
+  <link rel="stylesheet" href="../public/ideas-season.css?v=31">
+  <script defer src="../public/ideas-season.js?v=31"></script>
 <script>window.IDEAS_STUDENT_APP=true;</script><link rel="stylesheet" href="css/student-app.css?v=23">
 <link rel="stylesheet" href="css/theme-motion.css?v=2">
-<link rel="stylesheet" href="css/staff-app.css?v=4.2.2">
+<link rel="stylesheet" href="css/staff-app.css?v=4.2.3">
 </head>
 <body>
   <div id="sa-splash" role="status" aria-label="Cargando"><span class="spinner"></span></div>
