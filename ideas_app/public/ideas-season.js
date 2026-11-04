@@ -70,6 +70,18 @@
     }
     return out;
   }
+  // Ráfaga: copos que cruzan en diagonal, alargados por la velocidad, y estelas de viento.
+  function gustMarkup(count, width, streaks = 0) {
+    let out = '';
+    count = qty(count);
+    for (let i = 0; i < count; i++) {
+      const angle = rand(6, 26), dist = width + rand(80, 200);
+      out += `<i class="ideas-gust-flake" style="top:${rand(-10, 90).toFixed(1)}%;--ga:${angle.toFixed(1)}deg;--gdist:${dist.toFixed(0)}px;--gd:${rand(1.1, 2.1).toFixed(2)}s;--gdl:${rand(0, 1.3).toFixed(2)}s;--gs:${rand(3.5, 7.5).toFixed(1)}px;--go:${rand(0.55, 0.95).toFixed(2)}"></i>`;
+    }
+    streaks = LITE ? Math.ceil(streaks / 2) : streaks;
+    for (let i = 0; i < streaks; i++) out += `<i class="ideas-gust-streak" style="top:${rand(5, 85).toFixed(1)}%;--ga:${rand(6, 16).toFixed(1)}deg;--gdist:${(width + 220).toFixed(0)}px;--gd:${rand(0.9, 1.4).toFixed(2)}s;--gdl:${rand(0, 0.7).toFixed(2)}s;--gw:${rand(50, 110).toFixed(0)}px"></i>`;
+    return out;
+  }
   // Destello de cuatro puntas (estrellas del cielo y brillos).
   function glints(count, cls, area) {
     let out = '';
@@ -224,7 +236,7 @@
       '<span class="ideas-scene-moon"></span><span class="ideas-shooting"><i></i></span>' +
       `<span class="ideas-sleigh"><span class="ideas-sleigh-bob"><span class="ideas-stardust"><i></i><i></i><i></i><i></i></span>${sleigh}${legs(48, 'ideas-sleigh-legs--a')}${legs(70, 'ideas-sleigh-legs--b')}</span></span>` +
       '<span class="ideas-scene-hill ideas-scene-hill--back"></span><span class="ideas-scene-hill ideas-scene-hill--front"></span>' +
-      `<span class="ideas-scene-props">${cabin}<i class="ideas-cabin-glow"></i><span class="ideas-smoke"><i></i><i></i><i></i></span>${tree('ideas-tree--a')}${tree('ideas-tree--b')}${cane('ideas-cane--a')}${cane('ideas-cane--b')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--a')}${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--b')}${gift('#37996a', '#2a7a53', '#ff9ecb', 'ideas-gift--c')}${tree('ideas-tree--c')}${snowman}</span>` +
+      `<span class="ideas-scene-props">${cabin}<i class="ideas-cabin-glow"></i><span class="ideas-smoke"><i></i><i></i><i></i></span>${tree('ideas-tree--a')}${tree('ideas-tree--b')}${cane('ideas-cane--a')}${cane('ideas-cane--b')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--a')}${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--b')}${gift('#37996a', '#2a7a53', '#ff9ecb', 'ideas-gift--c')}${tree('ideas-tree--c')}${snowman}<span class="ideas-snowball"><i></i></span><i class="ideas-snowball-puff"></i></span>` +
       `<span class="ideas-scene-snow">${snow(16, 180)}</span>` +
       garland({ bulbs: lights(innerWidth < 380 ? 12 : 16), sag: 8, segments: 5, height: 16, cls: 'ideas-garland--scene' }) +
       `<div class="ideas-scene-text"><strong>¡Felices fiestas!</strong><span>Instituto IDEAS te desea una feliz Navidad</span><em class="ideas-countdown">${countdown()}</em></div>`;
@@ -239,13 +251,28 @@
     document.querySelectorAll('.view .large-title__kicker').forEach((kicker) => {
       if (kicker.closest('.view')?.querySelector('.hero') && !kicker.querySelector('.ideas-holly')) kicker.insertAdjacentHTML('beforeend', holly + bell);
     });
-    // Escarcha en el borde superior de las tarjetas (pseudoelementos: no cambia su estructura).
-    // Solo cae sobre el relleno superior vacío; el destello se ubica distinto en cada tarjeta.
+    // Nevada de fondo: va DETRÁS del contenido de cada pantalla (se ve en los huecos entre tarjetas y en los
+    // márgenes) y entre la barra superior y la de pestañas, para no obligarlas a recalcular su desenfoque.
+    document.querySelectorAll('#app-view > .view').forEach((view) => {
+      if (view.querySelector(':scope > .ideas-bg-snow')) return;
+      view.insertAdjacentHTML('afterbegin', `<div class="ideas-bg-snow" ${DECOR} aria-hidden="true">${snow(14, Math.round(innerHeight * 0.95))}<span class="ideas-gust-layer"></span></div>`);
+    });
+    // Guirnalda bajo la barra superior: ocupa su propio espacio antes del título grande.
+    document.querySelectorAll('.view__scroll > .large-title').forEach((title) => {
+      if (!title.previousElementSibling?.matches('.ideas-garland--top')) title.insertAdjacentHTML('beforebegin', garland({ bulbs: lights(innerWidth < 380 ? 13 : 16), sag: 6, segments: 4, height: 14, cls: 'ideas-garland--top' }));
+    });
+    // Barra de pestañas con escarcha en su borde superior (en el relleno, sobre los íconos no).
+    const tabbar = document.getElementById('bottom-nav');
+    if (tabbar) setClass(tabbar, 'ideas-tabbar-frost', !tabbar.hidden);
+    // Escarcha en el borde superior de tarjetas, estadísticas, accesos y botones principales (pseudoelementos:
+    // no cambia su estructura). Solo cae sobre el relleno superior vacío; el destello va en una de cada tres.
     let cardIndex = 0;
-    document.querySelectorAll('.view .ios-card').forEach((card) => {
+    document.querySelectorAll('.view .ios-card, .view .stat-tile, .view .cta, .view .ios-btn-primary:not(.ios-btn--sm)').forEach((card) => {
       if (card.closest('[data-ideas-decor],.staff-skeleton,.sheet,.action-sheet,dialog,[role="dialog"]')) return;
       setClass(card, 'ideas-frost');
-      for (let v = 1; v <= 3; v++) setClass(card, 'ideas-frost--' + v, v === cardIndex % 3 + 1);
+      // Las estadísticas ya tienen su esfera: escarcha sin destello. Una de cada tres tarjetas lleva acebo.
+      const variant = card.matches('.stat-tile, .ios-btn-primary') ? 3 : cardIndex % 3 + 1;
+      for (let v = 1; v <= 3; v++) setClass(card, 'ideas-frost--' + v, v === variant);
       const fx = ((cardIndex * 37) % 60 + 25) + '%';
       if (card.style.getPropertyValue('--ideas-fx') !== fx) card.style.setProperty('--ideas-fx', fx);
       cardIndex++;
@@ -264,7 +291,7 @@
     // Pie nevado (sección nueva al final) en las pantallas sin escena navideña.
     document.querySelectorAll('.view .view__content > .page').forEach((page) => {
       if (page.querySelector(':scope > .hero, :scope > .ideas-page-footer') || page.closest('.staff-skeleton') || page.querySelector('.staff-skeleton,.login')) return;
-      page.insertAdjacentHTML('beforeend', `<div class="ideas-page-footer" ${DECOR} aria-hidden="true"><span class="ideas-scene-snow">${snow(6, 76)}</span><span class="ideas-lamp-glow"></span>${lamp}<span class="ideas-footer-drift"></span><span class="ideas-penguin"><span class="ideas-penguin-turn"><span class="ideas-penguin-face"><span class="ideas-penguin-waddle">${penguin}${layer('ideas-penguin-wing', '<path d="M4.2 13q-3 4-1 8 2.4-1 2.6-4.4Z" fill="#1c262d"/>', '0 0 22 26')}</span></span></span></span>${tree('ideas-tree--f1')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--f')}${tree('ideas-tree--f2')}</div>`);
+      page.insertAdjacentHTML('beforeend', `<div class="ideas-page-footer" ${DECOR} aria-hidden="true"><span class="ideas-scene-snow">${snow(6, 76)}</span><span class="ideas-lamp-glow"></span>${lamp}<span class="ideas-footer-drift"></span><span class="ideas-penguin"><span class="ideas-penguin-turn"><span class="ideas-penguin-face"><span class="ideas-penguin-hop"><span class="ideas-penguin-waddle">${penguin}${layer('ideas-penguin-wing', '<path d="M4.2 13q-3 4-1 8 2.4-1 2.6-4.4Z" fill="#1c262d"/>', '0 0 22 26')}</span></span></span></span></span>${tree('ideas-tree--f1')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--f')}${tree('ideas-tree--f2')}</div>`);
     });
     // Copo que gira junto al título «Modo Navidad» (alumnos, personal y trabajadores).
     document.querySelectorAll('[data-ideas-season-toggle], #toggle-temporada').forEach((input) => {
@@ -296,6 +323,7 @@
   function undecorate() {
     document.querySelectorAll(`[${DECOR}]`).forEach((el) => el.remove());
     document.querySelectorAll('.ideas-frost').forEach((el) => { el.classList.remove('ideas-frost', 'ideas-frost--1', 'ideas-frost--2', 'ideas-frost--3'); el.style.removeProperty('--ideas-fx'); });
+    document.getElementById('bottom-nav')?.classList.remove('ideas-tabbar-frost');
     document.querySelectorAll('.ideas-avatar-decorated,.ideas-hero-decorated').forEach((el) => el.classList.remove('ideas-avatar-decorated', 'ideas-avatar-decorated--square', 'ideas-hero-decorated'));
   }
   const observed = new WeakSet();
@@ -319,11 +347,26 @@
     if (!windTimer) {
       const gust = () => {
         setRootData('data-ideas-viento', '1');
+        spawnGust();
         windOff = setTimeout(() => setRootData('data-ideas-viento', null), 2800);
         windTimer = setTimeout(gust, rand(15000, 26000));
       };
       windTimer = setTimeout(gust, rand(6000, 12000));
     }
+  }
+  function spawnGust() {
+    if (reduced() || blocked()) return;
+    const add = (container, markup) => {
+      if (!container || !container.isConnected || container.closest('.ideas-offscreen') || !container.getClientRects().length) return;
+      const burst = document.createElement('span');
+      burst.className = 'ideas-gust';
+      burst.innerHTML = markup;
+      container.append(burst);
+      setTimeout(() => burst.remove(), 3400);
+    };
+    document.querySelectorAll('.ideas-gust-layer').forEach((layer) => add(layer, gustMarkup(28, layer.parentElement.clientWidth || innerWidth, 5)));
+    document.querySelectorAll('.ideas-hero-snow').forEach((layer) => add(layer, gustMarkup(10, layer.clientWidth || 360, 2)));
+    document.querySelectorAll('.ideas-scene-snow').forEach((layer) => add(layer, gustMarkup(14, layer.clientWidth || 360, 3)));
   }
   // Tocar la escena: los árboles se sacuden, los regalos saltan, el muñeco saluda,
   // las luces destellan, cae una ráfaga de nieve y suenan campanitas (si la música no está apagada).
@@ -357,6 +400,7 @@
       setTimeout(() => burst.remove(), 2600);
     }
     jingle();
+    spawnGust();
     setTimeout(() => setClass(scene, 'ideas-celebrate', false), 2300);
   }
   document.addEventListener('click', (event) => {
@@ -490,5 +534,8 @@
     if (records.every((r) => ours(r.target) || (r.type === 'attributes' && r.target !== root && r.target !== body) || (r.type === 'childList' && [...r.addedNodes, ...r.removedNodes].every(ours)))) return;
     if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; update(); }); }
   }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'data-temporada', 'data-movimiento'] });
+  // Las apps llaman a esto justo después de redibujar una pantalla y ANTES de restaurar el desplazamiento:
+  // así los adornos que reservan espacio ya están puestos y el contenido no salta.
+  window.ideasSeasonDecorate = () => { try { if (enabled()) decorate(); } catch {} };
   update();
 })();

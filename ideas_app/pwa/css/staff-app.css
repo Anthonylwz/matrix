@@ -124,3 +124,5 @@
 .staff-expired p{color:var(--text-secondary);margin-bottom:20px;line-height:1.45}
 .staff-view .list-row[aria-busy="true"]{opacity:.6}
 @media (prefers-reduced-motion:reduce){.staff-view .staff-refresh.is-spinning svg{animation:none}}
+/* 4.2.2 · Repintado silencioso de la misma pantalla (datos actualizados): sin repetir la animación de entrada */
+.repaint-quiet .page > *,.repaint-quiet .login > *,.repaint-quiet .large-title,.repaint-quiet .view__content > :is(.page,.login) > *{animation:none!important}

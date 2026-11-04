@@ -1,6 +1,6 @@
 import {phoneChatMarkup} from './contact-links.js';
 import {personalWebLoginMarkup,bindPersonalWebLogin,handlePersonalQrBack,personalQrOpen} from './personal-web-login.js';
-import {staffSession,staffRequest,staffLogout,forgetStaffSession} from './staff-api.js';
+import {staffSession,staffRequest,staffLogout,forgetStaffSession,PANEL_CACHE} from './staff-api.js';
 import {initTheme,getThemePreference,setThemePreference} from './theme.js';
 import {icon,rowIcon} from './icons.js';
 import {showToast,showActionSheet,APP_VERSION} from './utils.js';
@@ -38,9 +38,13 @@ function content(title,body){
  const origin=panel?.identidad.origen==='intranet'?'Intranet':'Asistencia';
  const date=new Intl.DateTimeFormat('es-PE',{timeZone:'America/Lima',weekday:'long',day:'numeric',month:'long'}).format(Date.now());
  const previousTop=keepScroll?root.querySelector('.view__scroll')?.scrollTop||0:0;
+ // Repintado silencioso (mismo contenido actualizado): sin repetir la animación de entrada.
+ root.classList?.toggle('repaint-quiet',keepScroll);
  root.innerHTML=`<header class="nav-bar"><div class="nav-bar__leading"><span class="sa-brand">IDEAS</span></div><div class="nav-bar__title" aria-hidden="true">${esc(title)}</div><div class="nav-bar__trailing"><span class="connection-pill online" role="status" aria-label="Datos consultados en ${origin}"><span class="connection-dot"></span><span class="connection-pill__text">${origin}</span></span><button class="nav-btn staff-refresh" type="button" aria-label="Actualizar datos">${icon('refresh')}</button></div></header><div class="view__scroll"><div class="large-title"><div class="large-title__kicker">${route()==='home'?esc(date):'MI ESPACIO INSTITUCIONAL'}</div><div class="large-title__row"><h1 class="large-title__text" tabindex="-1">${esc(title)}</h1><span class="sa-account-chip">${esc(role)}</span></div></div><div class="view__content"><div class="page sa-page">${body}<div class="sa-sync-note">${origin} · ${panelLoadedAt?'Actualizado '+clock(panelLoadedAt):'Información según tus permisos'}</div></div></div></div>`;
  root.querySelector('.staff-refresh')?.addEventListener('click',event=>{event.currentTarget.classList.add('is-spinning');event.currentTarget.disabled=true;render({force:true,silent:QUIET_ROUTES.includes(route()),manual:true});});
  const scroller=root.querySelector('.view__scroll'),bar=root.querySelector('.nav-bar');
+ // Adornos de temporada antes de restaurar la posición (no hace saltar el contenido).
+ try{window.ideasSeasonDecorate?.();}catch{}
  const paintBar=()=>{bar.classList.toggle('is-scrolled',scroller.scrollTop>2);bar.classList.toggle('is-collapsed',scroller.scrollTop>58);};
  if(scroller&&previousTop){scroller.scrollTop=previousTop;paintBar();}
  scroller?.addEventListener('scroll',paintBar,{passive:true});
@@ -161,6 +165,13 @@ function paintSkeleton(kind=null){
  root.querySelector('.connection-pill')?.setAttribute('aria-label','Conectando con el servidor');
  root.querySelector('.connection-pill')?.classList.remove('online');root.querySelector('.connection-pill')?.classList.add('is-syncing');
 }
+// Caché del panel por sesión y servidor (máx. 12 h): al abrir se muestra al instante y se actualiza en segundo plano.
+function savePanelCache(session,data){try{localStorage.setItem(PANEL_CACHE,JSON.stringify({savedAt:Date.now(),token:session.token,server:session.server,data}));}catch{}}
+function readPanelCache(session){
+ try{const c=JSON.parse(localStorage.getItem(PANEL_CACHE)||'null');
+  if(!c||c.token!==session.token||c.server!==session.server||!c.data?.identidad||!Number.isFinite(c.savedAt)||Date.now()-c.savedAt>12*3600e3||Date.now()<c.savedAt)return null;
+  return c;}catch{return null;}
+}
 async function updatePanel(force=false){
  const session=staffSession();if(!session)throw Object.assign(new Error('La sesión finalizó.'),{status:401});
  const courseKey=route()==='courses'&&selectedCourse!==null?String(selectedCourse)+':'+offset:'';
@@ -168,7 +179,7 @@ async function updatePanel(force=false){
  let data;
  try{data=await load('panel',{curso:route()==='courses'?selectedCourse:null,offset});}
  catch(e){if(e.status!==404||route()!=='courses'||selectedCourse===null)throw e;selectedCourse=null;offset=0;data=await load('panel',{curso:null,offset:0});showToast('El curso ya no está disponible en tus asignaciones.','info');}
- panel=data;panelLoadedAt=Date.now();panelOwner=session.token;panelCourseKey=selectedCourse!==null&&route()==='courses'?String(selectedCourse)+':'+offset:'';
+ panel=data;panelLoadedAt=Date.now();panelOwner=session.token;if(!(route()==='courses'&&selectedCourse!==null))savePanelCache(session,data);panelCourseKey=selectedCourse!==null&&route()==='courses'?String(selectedCourse)+':'+offset:'';
 }
 async function render({force=false,silent=false,manual=false}={}){
  if(personalQrOpen()||loggingOut)return;
@@ -196,5 +207,9 @@ export async function initStaffApp(){
  document.getElementById('app-view').innerHTML='<section class="view view--tab student-view staff-view"></section>';root=document.querySelector('.staff-view');
  window.addEventListener('storage',handleAccountChange);window.addEventListener('hashchange',render);document.addEventListener('visibilitychange',()=>{if(document.hidden){stopCamera();clearTimeout(timer);controller?.abort();}else render({force:true,silent:true});});window.addEventListener('online',()=>render({force:true,silent:true}));window.addEventListener('offline',()=>{const pill=root?.querySelector('.connection-pill');pill?.classList.remove('online','is-syncing');pill?.classList.add('offline');const text=pill?.querySelector('.connection-pill__text');if(text)text.textContent='Sin conexión';});window.addEventListener('beforeunload',stopCamera);
  window.__androidBack=()=>{if(handlePersonalQrBack())return 'handled';if(scanner){stopCamera();render();return 'handled';}if(route()==='students'&&selectedStudentId){selectedStudentId=null;selectedPeriod=null;perform(()=>students());return 'handled';}if(route()==='team'&&selectedWorkerId){selectedWorkerId=null;perform(()=>team());return 'handled';}if(route()==='courses'&&selectedCourse){selectedCourse=null;offset=0;render();return 'handled';}if(route()!=='home'){location.hash='#home';return 'handled';}return 'exit';};
- scheduleSessionExpiry();await render();
+ scheduleSessionExpiry();
+ // Con un panel guardado de esta sesión, la pantalla aparece al instante y se actualiza sin esqueleto.
+ const session=staffSession(),cached=session&&QUIET_ROUTES.includes(route())?readPanelCache(session):null;
+ if(cached){panel=cached.data;panelOwner=session.token;panelLoadedAt=cached.savedAt;try{if(tabList().some(t=>t[0]===route())){if(route()==='profile')profile();else if(route()==='schedule')schedule();else home();}}catch{panel=null;}if(panel){render({force:true,silent:true});return;}}
+ await render();
 }

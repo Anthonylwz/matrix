@@ -359,9 +359,10 @@ export function init() {
           // Guardar sesión y redirigir
           await saveSession(response.data, response.data.token_sesion);
           // Para poder volver a entrar (y marcar) sin Internet en este celular
-          let recordada = false;
-          try { recordada = await rememberPassword(response.data, pass); } catch (_) {}
-          if (!recordada) console.warn('No se pudo guardar el acceso sin conexión en este celular');
+          // Se guarda en segundo plano: el cifrado PBKDF2 puede tardar en celulares lentos y no debe retrasar la entrada.
+          rememberPassword(response.data, pass).catch(() => false).then((recordada) => {
+            if (!recordada) console.warn('No se pudo guardar el acceso sin conexión en este celular');
+          });
           if (leftLogin || getServerKey() !== loginServer) {
             if (getUser()) window.location.hash = '#home';
             return;

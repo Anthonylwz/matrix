@@ -5,7 +5,9 @@ const KEY='ideas-personal-session:v1';
 export function staffSession(){
   try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.server===getServerKey()&&s.expires>Date.now()&&/^[a-f0-9]{64}$/.test(s.token)&&['asistencia','intranet'].includes(s.identity?.origen))return s;localStorage.removeItem(KEY);}catch{}return null;
 }
-export function forgetStaffSession(){localStorage.removeItem(KEY);try{window.AndroidNet?.clearSessionContext?.();}catch{}}
+// Último panel consultado de esta sesión: permite abrir la app al instante mientras se actualiza.
+export const PANEL_CACHE='ideas-personal-panel:v1';
+export function forgetStaffSession(){localStorage.removeItem(KEY);try{localStorage.removeItem(PANEL_CACHE);}catch{}try{window.AndroidNet?.clearSessionContext?.();}catch{}}
 export async function storeStaffSession(data){
   if(data?.tipo!=='personal'||!Number.isSafeInteger(data.identidad?.id)||data.identidad.id<1||!['asistencia','intranet'].includes(data.identidad?.origen)||typeof data.token_sesion!=='string'||!(/^[a-f0-9]{64}$/.test(data.token_sesion)))throw new Error('El servidor no identificó tu cuenta.');
   const server=getServerKey();

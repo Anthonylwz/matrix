@@ -111,7 +111,7 @@ export function initStudentApp(){
   window.addEventListener('online',autoRefresh);
   window.addEventListener('offline',()=>{offline=true;render();});
   huella=data?.huella||null;
-  if(data){lastSuccess=cachedAt||Date.now();render();schedulePoll();checkChanges();}else{render();refresh();}
+  if(data){lastSuccess=cachedAt||Date.now();render();schedulePoll();if(cachedAt)checkChanges();}else{render();refresh();}
 }
 function render(force=false){
   if(!force&&editing())return;
@@ -119,7 +119,7 @@ function render(force=false){
   if(!view)return;
   if(data)rememberStudentIdentity(data.alumno);
   const previousScroll=view.querySelector('.view__scroll');if(previousScroll&&lastScreen)scrollPositions.set(lastScreen,previousScroll.scrollTop);
-  const screen=key==='studies'?`${key}:${segment}`:key;lastScreen=screen;
+  const screen=key==='studies'?`${key}:${segment}`:key;view.classList?.toggle('repaint-quiet',screen===lastScreen);lastScreen=screen;
   document.querySelectorAll('#bottom-nav .tab-item').forEach(tab=>{const active=tab.dataset.route===key;tab.classList.toggle('active',active);if(active)tab.setAttribute('aria-current','page');else tab.removeAttribute('aria-current');});
   moveTabIndicator();
   const content=key==='notifications'?studentNoticesMarkup():key==='home'?home():key==='profile'?profile():key==='attendance'?attendance():key==='pagos'?pagos():studies();
@@ -132,7 +132,7 @@ function render(force=false){
   </div></div></div>`;
   saveStudentUi({segment,period});
   const scroller=view.querySelector('.view__scroll'),bar=view.querySelector('.nav-bar');
-  scroller.scrollTop=scrollPositions.get(screen)||0;
+  try{window.ideasSeasonDecorate?.();}catch{}scroller.scrollTop=scrollPositions.get(screen)||0;
   const updateBar=()=>{bar.classList.toggle('is-scrolled',scroller.scrollTop>2);bar.classList.toggle('is-collapsed',scroller.scrollTop>58);};updateBar();
   scroller.addEventListener('scroll',updateBar,{passive:true});
   view.querySelector('h1')?.setAttribute('tabindex','-1');

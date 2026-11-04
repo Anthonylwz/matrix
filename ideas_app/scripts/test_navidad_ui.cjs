@@ -87,7 +87,15 @@ const seedAdmin = ({ KEY, TOKEN }) => {
     assert.ok(calls.includes('panel'), 'Vuelve a consultar');
     assert.equal(await page.evaluate(() => window.__sawSkeleton), false, 'No muestra esqueleto');
     const after = await page.evaluate(() => document.querySelector('.view__scroll').scrollTop);
-    assert.ok(Math.abs(after - before) <= 12, `Conserva el desplazamiento (${before} → ${after})`);
+    assert.ok(Math.abs(after - before) <= 2, `Conserva el desplazamiento (${before} → ${after})`);
+    // Al final de la página (con la escena a la vista) el repintado tampoco recorta ni salta.
+    await page.evaluate(() => { const s = document.querySelector('.view__scroll'); s.scrollTop = s.scrollHeight; });
+    await page.waitForTimeout(300);
+    const bottom = await page.evaluate(() => [document.querySelector('.view__scroll').scrollTop, Math.round(document.querySelector('.ideas-xmas-scene').getBoundingClientRect().top)]);
+    await page.evaluate(() => window.dispatchEvent(new Event('online')));
+    await page.waitForTimeout(800);
+    const bottomAfter = await page.evaluate(() => [document.querySelector('.view__scroll').scrollTop, Math.round(document.querySelector('.ideas-xmas-scene').getBoundingClientRect().top)]);
+    assert.ok(Math.abs(bottomAfter[0] - bottom[0]) <= 2 && Math.abs(bottomAfter[1] - bottom[1]) <= 2, `La escena no salta al refrescar (${bottom} → ${bottomAfter})`);
     assert.match(await page.textContent('.sa-sync-note'), /Actualizado \d/);
     failPanel = true;
     await page.evaluate(() => window.dispatchEvent(new Event('online')));
@@ -110,6 +118,10 @@ const seedAdmin = ({ KEY, TOKEN }) => {
       assert.ok(await page.$(sel), `Falta ${sel}`);
     assert.match(await page.textContent('.ideas-countdown'), /Faltan \d+ días|Nochebuena|Feliz Navidad|Año Nuevo|Mañana/);
     assert.ok(await page.$eval('.ideas-sleigh', (el) => el.closest('.ideas-xmas-scene') !== null), 'El trineo vuela solo dentro de la escena');
+    // 4.2.2: invasión navideña (detrás del contenido o en espacios propios) y bola de nieve.
+    for (const sel of ['.view > .ideas-bg-snow .ideas-flake', '.view__scroll > .ideas-garland--top', '#bottom-nav.ideas-tabbar-frost', '.stat-tile.ideas-frost', '.cta.ideas-frost', '.ideas-snowball', '.ideas-snowball-puff'])
+      assert.ok(await page.$(sel), `Falta ${sel}`);
+    assert.equal(await page.$eval('.view > .ideas-bg-snow', (el) => el.nextElementSibling !== null && getComputedStyle(el).zIndex === '0'), true, 'La nevada de fondo queda detrás del contenido');
     // 4.2.0: tarjetas, títulos, vida y celebración.
     assert.ok(await page.$$eval('.ios-card.ideas-frost', (n) => n.length) >= 2, 'Escarcha en las tarjetas');
     assert.ok(await page.$$eval('.stat-tile > .ideas-tile-orn', (n) => n.length) >= 3, 'Esferas en las estadísticas');
@@ -121,12 +133,17 @@ const seedAdmin = ({ KEY, TOKEN }) => {
     await page.locator('.ideas-xmas-scene').scrollIntoViewIfNeeded();
     await page.locator('.ideas-xmas-scene').click();
     assert.ok(await page.$eval('.ideas-xmas-scene', (el) => el.classList.contains('ideas-celebrate')), 'Tocar la escena la celebra');
+    assert.ok(await page.$$eval('.ideas-gust .ideas-gust-flake', (n) => n.length) > 0, 'Tocar la escena desata una ráfaga de nieve');
     assert.ok(await page.$$eval('.ideas-burst .ideas-flake', (n) => n.length) > 0, 'Ráfaga de nieve al tocar');
     await page.waitForTimeout(2700);
     assert.equal(await page.$$eval('.ideas-burst', (n) => n.length), 0, 'La ráfaga se limpia sola');
+    await page.waitForTimeout(900);
+    assert.equal(await page.$$eval('.ideas-gust', (n) => n.length), 0, 'Los copos de la ráfaga se borran solos');
     assert.equal(await page.$eval('.ideas-xmas-scene', (el) => el.classList.contains('ideas-celebrate')), false);
     await page.goto(BASE + '#students'); await page.waitForSelector('.ideas-page-footer');
     assert.ok(await page.$('.ideas-page-footer .ideas-penguin') && await page.$('.ideas-page-footer .ideas-lamp'), 'Pie nevado con farol y pingüino');
+    assert.ok(await page.$('.ideas-page-footer .ideas-penguin-hop'), 'El pingüino salta');
+    assert.ok(await page.$('.ios-btn-primary.ideas-frost'), 'Escarcha en el botón principal');
     await page.goto(BASE + '#profile'); await page.waitForSelector('.ideas-avatar-decor');
     for (const sel of ['.ideas-avatar-orbit', '.ideas-side-snow', '.ideas-title-flake']) assert.ok(await page.$(sel), `Falta ${sel}`);
     // La escena de «Hoy» ya no está en pantalla; lo visible no queda en pausa.
@@ -136,6 +153,7 @@ const seedAdmin = ({ KEY, TOKEN }) => {
     assert.equal(await page.$$eval('[data-ideas-decor]', (n) => n.length), 0, 'Apagar quita los adornos');
     assert.equal(await page.$$eval('.ideas-avatar-decorated', (n) => n.length), 0, 'Y devuelve el espacio reservado');
     assert.equal(await page.$$eval('.ideas-frost', (n) => n.length), 0, 'Y quita la escarcha de las tarjetas');
+    assert.equal(await page.$$eval('.ideas-tabbar-frost', (n) => n.length), 0, 'Y la de la barra de pestañas');
     assert.equal(await page.evaluate(() => document.documentElement.hasAttribute('data-ideas-luces')), false, 'Y detiene los programas de luces');
     await page.click('[data-ideas-season-toggle]');
     await page.waitForTimeout(300);

@@ -389,6 +389,65 @@ html.ideas-christmas-still :is(.ideas-frost,.ideas-tile-orn)::after,html.ideas-c
 html.ideas-christmas-still :is(.ideas-penguin-turn,.ideas-penguin-face){animation:none!important}
 @media (prefers-reduced-motion:reduce){.ideas-frost::after{animation:none!important;opacity:0}:is(.ideas-penguin-turn,.ideas-penguin-face){animation:none!important}}
 
+/* ══ 4.2.2 · Invasión navideña: nevada de fondo, ráfagas, guirnalda superior y más escarcha ═════ */
+
+/* Nevada de fondo: detrás del contenido (se ve entre tarjetas y en los márgenes), nunca encima.
+   Se limita a la zona entre la barra superior y la de pestañas para no forzar su desenfoque. */
+.view>.ideas-bg-snow{position:absolute;left:0;right:0;top:calc(var(--safe-top,0px) + var(--nav-height,44px));bottom:calc(var(--tabbar-height,56px) + var(--safe-bottom,0px) + 22px);z-index:0;overflow:hidden;
+  -webkit-mask-image:linear-gradient(transparent,#000 36px,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(transparent,#000 36px,#000 calc(100% - 36px),transparent)}
+.view--bare>.ideas-bg-snow{top:var(--safe-top,0px);bottom:0}
+.ideas-bg-snow .ideas-flake>b{background:radial-gradient(circle,#90b6cf 0 34%,rgba(144,182,207,.5) 58%,transparent 72%)}
+.ideas-bg-snow .ideas-flake--star>b{background:none}
+.ideas-bg-snow .ideas-flake--star path{stroke:#90b6cf}
+html[data-theme="dark"] .ideas-bg-snow .ideas-flake>b{background:radial-gradient(circle,#fff 0 34%,rgba(255,255,255,.45) 58%,transparent 72%)}
+html[data-theme="dark"] .ideas-bg-snow .ideas-flake--star path{stroke:#fff}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) .ideas-bg-snow .ideas-flake>b{background:radial-gradient(circle,#fff 0 34%,rgba(255,255,255,.45) 58%,transparent 72%)}html:not([data-theme="light"]) .ideas-bg-snow .ideas-flake--star path{stroke:#fff}}
+.ideas-gust-layer,.ideas-gust{position:absolute;inset:0}
+
+/* Ráfaga: copos alargados por la velocidad y estelas de viento que cruzan en diagonal */
+.ideas-gust-flake{position:absolute;left:-14px;width:calc(var(--gs,4px) * 2.2);height:var(--gs,4px);border-radius:50%;
+  background:radial-gradient(closest-side,#fff 0 45%,rgba(255,255,255,.5) 70%,transparent);opacity:0;
+  transform-origin:0 50%;animation:ideas-gust-fly var(--gd,1.5s) cubic-bezier(.3,.05,.6,1) var(--gdl,0s) 1 both}
+.ideas-bg-snow .ideas-gust-flake{background:radial-gradient(closest-side,#9fc1d8 0 45%,rgba(159,193,216,.5) 70%,transparent)}
+html[data-theme="dark"] .ideas-bg-snow .ideas-gust-flake{background:radial-gradient(closest-side,#fff 0 45%,rgba(255,255,255,.5) 70%,transparent)}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) .ideas-bg-snow .ideas-gust-flake{background:radial-gradient(closest-side,#fff 0 45%,rgba(255,255,255,.5) 70%,transparent)}}
+.ideas-gust-streak{position:absolute;left:-120px;width:var(--gw,80px);height:1.5px;border-radius:2px;opacity:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.75) 60%,transparent);transform-origin:0 50%;animation:ideas-gust-fly var(--gd,1.2s) cubic-bezier(.2,.1,.5,1) var(--gdl,0s) 1 both}
+.ideas-bg-snow .ideas-gust-streak{background:linear-gradient(90deg,transparent,rgba(140,175,200,.55) 60%,transparent)}
+@keyframes ideas-gust-fly{0%{opacity:0;transform:rotate(var(--ga,12deg)) translateX(0)}12%{opacity:var(--go,.8)}80%{opacity:var(--go,.8)}100%{opacity:0;transform:rotate(var(--ga,12deg)) translateX(var(--gdist,400px))}}
+/* Con viento, la nevada de fondo también se desvía */
+html[data-ideas-viento="1"] .ideas-bg-snow>.ideas-flake{animation-duration:calc(var(--dur,8s) * .55)}
+
+/* Guirnalda bajo la barra superior (en su propio espacio, antes del título grande) */
+.ideas-garland--top{margin:2px -6px 0;z-index:1}
+.ideas-garland--top path{stroke:#2f4a3c}
+html[data-theme="dark"] .ideas-garland--top path{stroke:#9cc2ae}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) .ideas-garland--top path{stroke:#9cc2ae}}
+
+/* Barra de pestañas con escarcha en su borde superior: solo en el relleno de 6 px (los íconos empiezan a 12 px) */
+.ideas-tabbar-frost{--ideas-frost-art-tab:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%237fa9c2' opacity='.55'/%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' fill='%23e3f1fa'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
+html[data-theme="dark"] .ideas-tabbar-frost{--ideas-frost-art-tab:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) .ideas-tabbar-frost{--ideas-frost-art-tab:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}}
+.ideas-tabbar-frost::before{content:"";position:absolute;left:28px;right:28px;top:0;height:7px;z-index:2;pointer-events:none;
+  background:var(--ideas-frost-art-tab) repeat-x 0 -2px/160px 9px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent);mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 22px),transparent)}
+
+/* Acebo en una de cada tres tarjetas, junto a la escarcha (misma capa, sin animación) */
+.ideas-frost--2::before{background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 16'%3E%3Cpath d='M12 9C9 3 4 4 1 6c3 0 3 3 6 2-1 2 1 4 5 1Z' fill='%232f8a5c'/%3E%3Cpath d='M12 9c3-6 8-5 11-3-3 0-3 3-6 2 1 2-1 4-5 1Z' fill='%23246b48'/%3E%3Ccircle cx='10.5' cy='9.5' r='2.2' fill='%23d94b45'/%3E%3Ccircle cx='13.5' cy='9.5' r='2.2' fill='%23e85d55'/%3E%3Ccircle cx='12' cy='7' r='2.2' fill='%23c9372f'/%3E%3Ccircle cx='11.6' cy='6.3' r='.6' fill='%23fff' opacity='.7'/%3E%3C/svg%3E") no-repeat calc(100% - 30px) 0/15px 10px,var(--ideas-frost-art) repeat-x 0 0/160px 10px}
+
+/* Bola de nieve: el muñeco la lanza cuando el brazo vuelve adelante (mismo ciclo de 14 s que el saludo),
+   vuela en parábola dentro de la escena y estalla en polvo al caer. */
+.ideas-snowball{position:absolute;right:calc(10% + 1px);bottom:39px;width:6px;height:6px;z-index:3;opacity:0;animation:ideas-throw-x 14s linear infinite}
+.ideas-snowball>i{display:block;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff 0 40%,#dce9f1 70%,#b8cfdd);box-shadow:0 1px 2px rgba(0,0,0,.25);animation:ideas-throw-y 14s infinite}
+.ideas-snowball-puff{position:absolute;right:calc(10% + 90px);bottom:20px;width:18px;height:18px;z-index:3;border-radius:50%;opacity:0;
+  background:radial-gradient(circle,rgba(255,255,255,.98) 0 18%,rgba(206,226,240,.85) 32%,rgba(170,200,222,.5) 48%,transparent 66%);animation:ideas-puff 14s ease-out infinite}
+@keyframes ideas-throw-x{0%,87.9%{opacity:0;transform:translateX(0)}88%{opacity:1;transform:translateX(0)}89%{opacity:1;transform:translateX(0)}95%{opacity:1;transform:translateX(-95px)}95.4%,100%{opacity:0;transform:translateX(-95px)}}
+@keyframes ideas-throw-y{0%,89%{transform:translateY(0) scale(1);animation-timing-function:cubic-bezier(.2,.6,.4,1)}92%{transform:translateY(-30px) scale(1.1);animation-timing-function:cubic-bezier(.6,0,.8,.4)}95%,100%{transform:translateY(15px) scale(1)}}
+@keyframes ideas-puff{0%,94.8%{opacity:0;transform:scale(.3)}96%{opacity:.95;transform:scale(.8)}100%{opacity:0;transform:scale(1.8)}}
+
+/* Pingüino: da un saltito de vez en cuando mientras camina */
+.ideas-penguin-hop{display:block;width:100%;height:100%;animation:ideas-penguin-hop 5.3s ease-out infinite}
+@keyframes ideas-penguin-hop{0%,80%,100%{transform:translateY(0)}86%{transform:translateY(-7px)}91%{transform:translateY(0)}94%{transform:translateY(-2px)}97%{transform:translateY(0)}}
+
 /* Aparición suave al encender el Modo Navidad (solo contenedores sin animación propia) */
 html[data-ideas-entrada] :is(.ideas-xmas-scene,.ideas-avatar-decor,.ideas-hero-decor,.ideas-page-footer,.ideas-garland,.ideas-login-scene){animation:ideas-appear .9s cubic-bezier(.2,.8,.2,1) both}
 @keyframes ideas-appear{from{opacity:0;transform:translateY(6px) scale(.985)}}
@@ -402,6 +461,6 @@ html[data-theme="dark"] .ideas-garland--login path,html[data-theme="dark"] .idea
 body.is-immersive [data-ideas-decor]{display:none!important}
 /* Movimiento reducido: adornos quietos y sin nieve */
 html.ideas-christmas-still [data-ideas-decor],html.ideas-christmas-still [data-ideas-decor] *,html.ideas-christmas-still [data-ideas-decor] ::before,html.ideas-christmas-still [data-ideas-decor] ::after{animation:none!important}
-html.ideas-christmas-still :is(.ideas-flake,.ideas-sleigh,.ideas-shooting,.ideas-smoke){display:none}
-@media (prefers-reduced-motion:reduce){[data-ideas-decor],[data-ideas-decor] *,[data-ideas-decor] ::before,[data-ideas-decor] ::after{animation:none!important}:is(.ideas-flake,.ideas-sleigh,.ideas-shooting,.ideas-smoke){display:none}}
+html.ideas-christmas-still :is(.ideas-flake,.ideas-sleigh,.ideas-shooting,.ideas-smoke,.ideas-gust,.ideas-bg-snow,.ideas-snowball,.ideas-snowball-puff){display:none}
+@media (prefers-reduced-motion:reduce){[data-ideas-decor],[data-ideas-decor] *,[data-ideas-decor] ::before,[data-ideas-decor] ::after{animation:none!important}:is(.ideas-flake,.ideas-sleigh,.ideas-shooting,.ideas-smoke,.ideas-gust,.ideas-bg-snow,.ideas-snowball,.ideas-snowball-puff){display:none}}
 @media print{[data-ideas-decor]{display:none!important}}

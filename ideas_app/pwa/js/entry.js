@@ -1,5 +1,6 @@
 import { staffSession, unifiedLogin, storeStaffSession } from './staff-api.js';
 import { accountDni } from './auth.js';
+import { getServerKey } from './server-context.js';
 import { studentSession, acceptStudentLogin } from './student-api.js';
 import { useProfileServerControls } from './student-server.js';
 import { icon } from './icons.js';
@@ -17,8 +18,14 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)useProfile
 if('serviceWorker' in navigator&&!isBundledAndroid()){
   navigator.serviceWorker.register(new URL('../service-worker.js',import.meta.url),{scope:new URL('../',import.meta.url).pathname}).then(registration=>registration.update()).catch(()=>{});
 }
+// Pista local (sin contraseñas): «en este servidor, este DNI solo tiene cuenta de trabajador».
+const WORKER_HINT='ideas-acceso-trabajador:v1',HINT_MS=7*24*3600e3;
+const workerHint=dni=>{try{const h=JSON.parse(localStorage.getItem(WORKER_HINT)||'null');return Boolean(h&&h.dni===dni&&h.server===getServerKey()&&Date.now()-h.at<HINT_MS&&Date.now()>=h.at&&accountDni()===dni);}catch{return false;}};
+const rememberWorkerHint=dni=>{try{localStorage.setItem(WORKER_HINT,JSON.stringify({dni,server:getServerKey(),at:Date.now()}));}catch{}};
+const forgetWorkerHint=()=>{try{localStorage.removeItem(WORKER_HINT);}catch{}};
 function startApp(){
-let studentAccessPending=false,chosenAccount=null;
+let studentAccessPending=false,chosenAccount=null,directTried=null;
+window.addEventListener('hashchange',()=>{if(!/login/.test(location.hash))directTried=null;});
 if(staffSession()){
   import('./staff-app.js').then(module=>{const ready=module.initStaffApp();requestAnimationFrame(()=>requestAnimationFrame(endBoot));return ready;}).then(endBoot).catch(()=>{document.getElementById('app-view').textContent='No se pudo cargar el panel. Cierra y vuelve a abrir la app.';endBoot();});
 } else if(studentSession()) {
@@ -81,7 +88,10 @@ if(staffSession()){
     const selected=document.getElementById('login-account-type');if(!selected)return;
     // El desvío a trabajador dura un solo envío; el siguiente acceso vuelve a detectarse.
     if(selected.value==='trabajador'){chosenAccount=null;queueMicrotask(()=>{if(selected.isConnected)selected.value='automatico';});return;}
-    if(selected.value==='automatico'&&!navigator.onLine&&accountDni()===document.getElementById('login-dni')?.value.trim()){selected.value='trabajador';queueMicrotask(()=>{if(selected.isConnected)selected.value='automatico';});return;}
+    const typed=document.getElementById('login-dni')?.value.trim()||'';
+    // Celular vinculado a un trabajador ya confirmado: se entra directo (si falla, el siguiente intento usa el acceso normal).
+    if(selected.value==='automatico'&&navigator.onLine&&directTried!==typed&&workerHint(typed)){directTried=typed;selected.value='trabajador';queueMicrotask(()=>{if(selected.isConnected)selected.value='automatico';});return;}
+    if(selected.value==='automatico'&&!navigator.onLine&&accountDni()===typed){selected.value='trabajador';queueMicrotask(()=>{if(selected.isConnected)selected.value='automatico';});return;}
     event.preventDefault();event.stopImmediatePropagation();
     const button=event.target.querySelector('[type="submit"]'); if(button.disabled||studentAccessPending)return;studentAccessPending=true;
     const error=document.getElementById('login-error');
@@ -96,13 +106,14 @@ if(staffSession()){
       if(!dni||dni.length>100||password.length<6)throw new Error('Revisa tu DNI o usuario y tu contraseña.');
       const response=await unifiedLogin(dni,password,origin);
       event.target.querySelector('[data-account-choices]')?.remove();
-      if(response.seleccionar_cuenta){
+      if(response.seleccionar_cuenta){forgetWorkerHint();
         const accounts=[...new Map((Array.isArray(response.cuentas)?response.cuentas:[]).filter(a=>['trabajador','administracion','intranet'].includes(a?.origen)).map(a=>[a.origen,a])).values()];
         if(accounts.length<2)throw new Error('No se pudo confirmar tu cuenta. Inténtalo nuevamente.');
         const choices=document.createElement('fieldset');choices.dataset.accountChoices='';const legend=document.createElement('legend');legend.textContent='Encontramos dos accesos para ti. Elige uno y confirma tu contraseña';choices.append(legend);
         for(const account of accounts){const choice=document.createElement('button');choice.type='button';choice.className='ios-btn ios-btn-secondary';choice.textContent=account.etiqueta;choice.addEventListener('click',()=>{chosenAccount={identity:dni,origin:account.origen};selected.value=account.origen==='intranet'?'alumno':account.origen;selected.dispatchEvent(new Event('change'));choices.remove();document.getElementById('login-password')?.focus();});choices.append(choice);}event.target.append(choices);return;
       }
-      if(response.continuar_trabajador){selected.value='trabajador';selected.dispatchEvent(new Event('change'));delegateWorker=true;return;}
+      if(response.continuar_trabajador){rememberWorkerHint(dni);selected.value='trabajador';selected.dispatchEvent(new Event('change'));delegateWorker=true;return;}
+      forgetWorkerHint();
       if(response.tipo==='alumno')acceptStudentLogin(response,dni);
       else if(response.tipo==='personal')await storeStaffSession(response);
       else throw new Error('El servidor no devolvió un rol válido.');

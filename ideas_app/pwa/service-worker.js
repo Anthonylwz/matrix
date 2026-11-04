@@ -1,5 +1,5 @@
 // Service Worker para PWA Asistencia Ideas
-const CACHE_VERSION = 'ideas-4.2.1-navidad-r1';
+const CACHE_VERSION = 'ideas-4.2.2-navidad-r1';
 const CACHE_STATIC = `asistencia-static-${CACHE_VERSION}`;
 const CACHE_DYNAMIC = `asistencia-dynamic-${CACHE_VERSION}`;
 
@@ -15,7 +15,7 @@ const STATIC_ASSETS = [
   './js/personal-web-login.js',
   './pages/contacts.js',
   './js/staff-app.js',
-  './css/staff-app.css?v=4.2.1',
+  './css/staff-app.css?v=4.2.2',
   './js/student-push.js',
   './js/worker-contact.js',
   './js/student-web-login.js',
@@ -41,7 +41,7 @@ const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './css/app.css?v=4.2.1',
+  './css/app.css?v=4.2.2',
   './js/app.js',
   './js/api.js',
   './js/auth.js',
@@ -77,8 +77,8 @@ const STATIC_ASSETS = [
   './icons/apple-touch-icon.png',
   './icons/icon.svg',
   // Recursos compartidos que index.html y el login cargan desde ../public
-  '../public/ideas-season.css?v=29',
-  '../public/ideas-season.js?v=29',
+  '../public/ideas-season.css?v=30',
+  '../public/ideas-season.js?v=30',
   '../public/img/ideas-official.png'
 ];
 

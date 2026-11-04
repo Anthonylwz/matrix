@@ -7,8 +7,35 @@ import { getServerKey } from './server-context.js';
 // URL base de la API. Puede sobreescribirse si la PWA se aloja en otro dominio o subcarpeta.
 export const API_BASE_URL = window.APP_API_URL || '../api/';
 
+// Prioridad de red: al abrir la app se lanzan varias consultas a la vez. Las principales (jornada,
+// historial, ingreso, marcación, perfil) salen primero; las secundarias esperan a que terminen,
+// como máximo 1,5 s, para no competir por el servidor. Nunca se descarta una consulta.
+const SECONDARY = /^(permisos|correcciones|notificaciones|cambios_app|v1\/anuncios\/listar|estado_servidor)\.php/;
+let priorityInFlight = 0;
+const priorityWaiters = new Set();
+function releasePriority() {
+  priorityInFlight = Math.max(0, priorityInFlight - 1);
+  if (!priorityInFlight) { priorityWaiters.forEach((resolve) => resolve()); priorityWaiters.clear(); }
+}
+function waitForPriority(signal) {
+  if (!priorityInFlight) return Promise.resolve();
+  return new Promise((resolve) => {
+    const done = () => { clearTimeout(timer); priorityWaiters.delete(done); signal?.removeEventListener('abort', done); resolve(); };
+    const timer = setTimeout(done, 1500);
+    priorityWaiters.add(done);
+    signal?.addEventListener('abort', done, { once: true });
+  });
+}
+
 // Cliente HTTP genérico para endpoints JSON
 export async function apiRequest(endpoint, options = {}) {
+  const secondary = SECONDARY.test(endpoint.replace(/^\//, ''));
+  if (secondary) await waitForPriority(options.signal);
+  else priorityInFlight++;
+  try { return await sendRequest(endpoint, options); } finally { if (!secondary) releasePriority(); }
+}
+
+async function sendRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL.replace(/\/$/, '')}/${endpoint.replace(/^\//, '')}`;
   const initialServer = getServerKey();
   const initialToken = getToken();
@@ -101,8 +128,27 @@ export async function apiRequest(endpoint, options = {}) {
 }
 
 // Comprueba estado real del servidor y base de datos
+// Las comprobaciones simultáneas (monitor de conexión, login, sincronización) comparten una sola
+// petición, y una respuesta correcta se reutiliza durante 3 s.
+let statusInFlight = null, lastStatus = null, lastStatusAt = 0, lastStatusServer = '';
 export async function checkServerStatus(options = {}) {
-  return await apiRequest('estado_servidor.php', { signal: options.signal, timeoutMs: options.timeoutMs });
+  const server = getServerKey();
+  if (lastStatus?.success && lastStatusServer === server && Date.now() - lastStatusAt < 3000) return lastStatus;
+  if (!statusInFlight || statusInFlight.server !== server) {
+    const request = apiRequest('estado_servidor.php', { timeoutMs: options.timeoutMs }).then((result) => {
+      if (getServerKey() === server) { lastStatus = result; lastStatusAt = Date.now(); lastStatusServer = server; }
+      return result;
+    }).finally(() => { if (statusInFlight?.request === request) statusInFlight = null; });
+    statusInFlight = { request, server };
+  }
+  const shared = statusInFlight.request;
+  if (!options.signal) return shared;
+  if (options.signal.aborted) return { status: 0, success: false, cancelled: true, message: '' };
+  return new Promise((resolve) => {
+    const onAbort = () => resolve({ status: 0, success: false, cancelled: true, message: '' });
+    options.signal.addEventListener('abort', onAbort, { once: true });
+    shared.then((result) => { options.signal.removeEventListener('abort', onAbort); resolve(result); });
+  });
 }
 
 // Desvincula este celular en el servidor (anula sesión, notificaciones y credencial sin conexión)
