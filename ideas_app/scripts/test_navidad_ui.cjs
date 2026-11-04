@@ -105,7 +105,15 @@ const seedAdmin = ({ KEY, TOKEN }) => {
     await page.goto(BASE + '#home'); await page.waitForSelector('.ideas-xmas-scene');
     assert.equal(await page.$$eval('.ideas-christmas-layer,.ideas-christmas-audio', (n) => n.length), 0, 'Sin capas fijas');
     assert.equal(await page.$$eval('.ideas-hero-decor', (n) => n.length), 1);
+    // Piezas nuevas de 4.1.8: todas dentro de sus espacios propios.
+    for (const sel of ['.ideas-sleigh', '.ideas-shooting', '.ideas-aurora', '.ideas-glint--sky', '.ideas-cabin', '.ideas-smoke', '.ideas-cane', '.ideas-countdown', '.ideas-glint--hero', '.ideas-bell', '.ideas-note-flake'])
+      assert.ok(await page.$(sel), `Falta ${sel}`);
+    assert.match(await page.textContent('.ideas-countdown'), /Faltan \d+ días|Nochebuena|Feliz Navidad|Año Nuevo|Mañana/);
+    assert.ok(await page.$eval('.ideas-sleigh', (el) => el.closest('.ideas-xmas-scene') !== null), 'El trineo vuela solo dentro de la escena');
     await page.goto(BASE + '#profile'); await page.waitForSelector('.ideas-avatar-decor');
+    for (const sel of ['.ideas-avatar-orbit', '.ideas-side-snow', '.ideas-title-flake']) assert.ok(await page.$(sel), `Falta ${sel}`);
+    // La escena de «Hoy» ya no está en pantalla; lo visible no queda en pausa.
+    assert.equal(await page.$eval('.ideas-avatar-decor', (el) => el.classList.contains('ideas-offscreen')), false);
     await page.click('[data-ideas-season-toggle]');
     await page.waitForTimeout(300);
     assert.equal(await page.$$eval('[data-ideas-decor]', (n) => n.length), 0, 'Apagar quita los adornos');

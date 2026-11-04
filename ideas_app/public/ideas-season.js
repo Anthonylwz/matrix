@@ -32,7 +32,8 @@
   const rand = (min, max) => min + Math.random() * (max - min);
   const bulb = (i, style) => {
     const [c, d] = BULBS[i % BULBS.length];
-    return `<i class="ideas-bulb" style="--c:${c};--d:${d};--tw:${(i % 4) * -0.9}s;${style}"></i>`;
+    // Retraso por posición = luces «en cadena»; cada bombilla oscila con su propio periodo.
+    return `<i class="ideas-bulb" style="--c:${c};--d:${d};--tw:${(i * -0.23).toFixed(2)}s;--sd:${(i % 5) * -0.7}s;--sp:${(2.6 + (i % 3) * 0.45).toFixed(2)}s;${style}"></i>`;
   };
   // Guirnalda con caída suave entre puntos de sujeción; las bombillas cuelgan del cable.
   function garland({ bulbs = 14, sag = 7, segments = 4, height = 16, cls = '' } = {}) {
@@ -48,14 +49,36 @@
     return `<span class="ideas-garland ${cls}" ${DECOR} aria-hidden="true" style="--gh:${height}px"><svg viewBox="0 0 100 ${height}" preserveAspectRatio="none"><path d="${d}" vector-effect="non-scaling-stroke"/></svg>${lights}</span>`;
   }
   const flake = '<svg viewBox="0 0 20 20"><path d="M10 1v18M2.2 5.5l15.6 9M2.2 14.5l15.6-9M10 4 8 2M10 4l2-2M10 16l-2 2M10 16l2 2"/></svg>';
+  // Tres planos: los copos cercanos son más grandes, opacos y rápidos; los lejanos, pequeños y lentos.
   function snow(count, fall) {
     let out = '';
     for (let i = 0; i < count; i++) {
-      const size = rand(3, i % 3 === 0 ? 9 : 5).toFixed(1);
-      const shape = i % 3 === 0 ? flake : '';
-      out += `<i class="ideas-flake${shape ? ' ideas-flake--star' : ''}" style="left:${rand(0, 100).toFixed(1)}%;--s:${size}px;--dur:${rand(6, 11).toFixed(1)}s;--delay:${rand(-11, 0).toFixed(1)}s;--dx:${rand(-18, 18).toFixed(0)}px;--fall:${fall}px;--o:${rand(0.45, 0.9).toFixed(2)}">${shape}</i>`;
+      const depth = i % 3; // 0 lejos · 1 medio · 2 cerca
+      const size = rand([2.5, 3.5, 5][depth], [3.5, 5, 8.5][depth]);
+      const shape = depth === 2 && i % 2 === 0 ? flake : '';
+      const dur = rand([11, 8.5, 6.5][depth], [14, 10.5, 8][depth]);
+      out += `<i class="ideas-flake${shape ? ' ideas-flake--star' : ''}" style="left:${rand(0, 100).toFixed(1)}%;--s:${size.toFixed(1)}px;--dur:${dur.toFixed(1)}s;--delay:${rand(-dur, 0).toFixed(1)}s;--fall:${fall}px;--o:${[0.45, 0.65, 0.9][depth]};--sway:${rand(6, 16).toFixed(0)}px;--sd:${rand(2.4, 4.2).toFixed(1)}s"><b>${shape}</b></i>`;
     }
     return out;
+  }
+  // Destello de cuatro puntas (estrellas del cielo y brillos).
+  function glints(count, cls, area) {
+    let out = '';
+    for (let i = 0; i < count; i++) out += `<i class="ideas-glint ${cls}" style="left:${rand(area[0], area[1]).toFixed(1)}%;top:${rand(area[2], area[3]).toFixed(1)}%;--g:${rand(4, 9).toFixed(1)}px;--gd:${rand(2.2, 4.6).toFixed(1)}s;--gl:${rand(-4.6, 0).toFixed(1)}s"></i>`;
+    return out;
+  }
+  // Cuenta regresiva en hora de Lima (24 y 25 de diciembre, Año Nuevo y Reyes tienen su propio mensaje).
+  function countdown() {
+    let y, m, d;
+    try { [y, m, d] = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()).split('-').map(Number); }
+    catch { const t = new Date(); [y, m, d] = [t.getFullYear(), t.getMonth() + 1, t.getDate()]; }
+    const day = (Y, M, D) => Math.round(Date.UTC(Y, M - 1, D) / 864e5), today = day(y, m, d);
+    if (m === 12 && d === 24) return '¡Hoy es Nochebuena!';
+    if (m === 12 && d === 25) return '¡Feliz Navidad!';
+    if (m === 12 && d > 25) { const n = day(y + 1, 1, 1) - today; return n === 1 ? '¡Mañana es Año Nuevo!' : `Faltan ${n} días para Año Nuevo`; }
+    if (m === 1 && d <= 6) return '¡Feliz Año Nuevo!';
+    const n = day(y, 12, 25) - today;
+    return n === 1 ? '¡Mañana es Navidad!' : `Faltan ${n} días para Navidad`;
   }
   const tree = (cls = '') => `<svg class="ideas-tree ${cls}" viewBox="0 0 40 56" aria-hidden="true">
     <path d="M17 45h6v9h-6z" fill="#7a5235"/><path d="M17 45h3v9h-3z" fill="#946645"/>
@@ -66,10 +89,20 @@
     <circle class="ideas-orn" cx="13" cy="26" r="1.9" fill="#ff6b5e"/><circle class="ideas-orn" cx="25" cy="21" r="1.7" fill="#6cb8ff"/>
     <circle class="ideas-orn" cx="11" cy="40" r="2" fill="#ffd166"/><circle class="ideas-orn" cx="21" cy="36" r="1.8" fill="#ff9ecb"/>
     <circle class="ideas-orn" cx="30" cy="41" r="1.9" fill="#ff6b5e"/>
+    <circle class="ideas-tree-halo" cx="20" cy="6.6" r="5" fill="#ffd166"/>
+    <path class="ideas-tree-rays" d="M20-2.6v3.4M20 12.4v3M11 6.6h3.4M26 6.6h3.4" stroke="#ffe39a" stroke-width="1" stroke-linecap="round"/>
     <path class="ideas-tree-star" d="M20 .8l1.9 3.9 4.3.6-3.1 3 .7 4.3L20 10.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z" fill="#ffd166"/>
   </svg>`;
   const gift = (a, b, ribbon, cls = '') => `<svg class="ideas-gift ${cls}" viewBox="0 0 20 18" aria-hidden="true"><rect x="1.5" y="6.5" width="17" height="11" rx="1.5" fill="${a}"/><rect x="10" y="6.5" width="8.5" height="11" rx="1.5" fill="${b}"/><rect x=".5" y="3.8" width="19" height="4" rx="1.2" fill="${a}"/><rect x="8.6" y="3.8" width="2.8" height="13.7" fill="${ribbon}"/><path d="M10 3.8C7 0 3.5 1.6 6.3 3.8M10 3.8c3-3.8 6.5-2.2 3.7 0" fill="none" stroke="${ribbon}" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   const snowman = '<svg class="ideas-snowman" viewBox="0 0 40 56" aria-hidden="true"><ellipse cx="20" cy="43" rx="15" ry="12" fill="#f3f8fb" stroke="#9db7c6"/><path d="M8 47q12 8 24 0" fill="none" stroke="#d7e6ee" stroke-width="3"/><g class="ideas-snowman-head"><circle cx="20" cy="25" r="10" fill="#fbfdfe" stroke="#9db7c6"/><path d="M10 17h21M14 16V7h13v9" fill="#304d53" stroke="#304d53" stroke-width="3"/><path d="M14 13.5h13" stroke="#c9483f" stroke-width="2"/><path d="M12 32h16l-4 5-12-2" fill="#c9483f"/><path d="M14 33.5h12" stroke="#ffd166" stroke-width="1" stroke-dasharray="1.5 1.5"/><g class="ideas-snowman-eyes"><circle cx="17" cy="24" r="1.2"/><circle cx="23" cy="24" r="1.2"/></g><path d="m20 26 8 2-8 2" fill="#e08a3a"/></g><circle cx="20" cy="41" r="1.3"/><circle cx="20" cy="47" r="1.3"/><path d="m7 39-5-8" stroke="#8d7664" stroke-width="2"/><path class="ideas-snowman-wave" d="m33 39 5-8" stroke="#8d7664" stroke-width="2"/></svg>';
+  // Trineo con dos renos genéricos (dibujo propio).
+  const reindeer = (x) => `<g class="ideas-deer" transform="translate(${x} 0)"><path d="M2 12q1-5 8-5 4 0 6 2l3-4 1 1-2 4q1 2-1 3-2 1-7 1-6 0-8-2Z" fill="#9a6a44"/><path d="M5 13q4 2 10 0" stroke="#c99b70" stroke-width="1.4" fill="none"/><path d="M19 5l-1-3m1 3 2-2m-2 2-3-2" stroke="#6e4a2e" stroke-width=".9" stroke-linecap="round"/><circle cx="20.6" cy="8.4" r=".9" fill="#3a2a20"/><g class="ideas-legs"><path d="M5 13l-2 5M8 13l1 5M13 13l-1 5M15 12l3 5" stroke="#6e4a2e" stroke-width="1.2" stroke-linecap="round"/></g></g>`;
+  const sleigh = `<svg class="ideas-sleigh-art" viewBox="0 0 96 24" aria-hidden="true"><path d="M30 13c10 0 16-1 22-3M50 11c10-1 14-2 20-3" stroke="#f2c14e" stroke-width=".8" fill="none"/>${reindeer(48)}${reindeer(70)}<path d="M4 9q-2 7 6 8h20q4 0 5-5l1-4H12q-4 0-4 3" fill="#c9372f"/><path d="M10 10h22" stroke="#ffd166" stroke-width="1"/><path d="M2 20h30q4 0 5-3" stroke="#ffd166" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M8 17v3M28 17v3" stroke="#ffd166" stroke-width="1.2"/><path d="M14 8q-1-7 6-7t7 6Z" fill="#2f8a5c"/><rect x="21" y="2" width="5" height="5" rx="1" fill="#6cb8ff"/><path d="M23.5 2v5" stroke="#fff" stroke-width=".8"/></svg>`;
+  const cabin = `<svg class="ideas-cabin" viewBox="0 0 44 38" aria-hidden="true"><path d="M31 6h5v12h-5z" fill="#6e4a2e"/><path d="M30 4h7v3h-7z" fill="#f4f8fb"/><path d="M5 20h34v17H5z" fill="#8a5a3b"/><path d="M5 24h34M5 28h34M5 32h34" stroke="#6e4a2e" stroke-width=".8"/><path d="M1 21 22 6l21 15Z" fill="#7a3b2c"/><path d="M0 22 22 5.5 44 22l-2.5 1.5L22 9 2.5 23.5Z" fill="#f4f8fb"/><rect class="ideas-cabin-window" x="10" y="24" width="8" height="7" rx="1" fill="#ffd27a"/><path d="M14 24v7M10 27.5h8" stroke="#8a5a3b" stroke-width=".9"/><rect x="25" y="25" width="7" height="12" rx="1" fill="#5a3b26"/><circle cx="30.5" cy="31" r=".7" fill="#ffd166"/><path d="M3 37h38" stroke="#f4f8fb" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const cane = (cls) => `<svg class="ideas-cane ${cls}" viewBox="0 0 12 26" aria-hidden="true"><path d="M3 25V7a4 4 0 0 1 8 0" fill="none" stroke="#fdfdfd" stroke-width="3.2" stroke-linecap="round"/><path d="M3 25V7a4 4 0 0 1 8 0" fill="none" stroke="#d9363e" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="2.2 2.4"/></svg>`;
+  const bell = `<span class="ideas-bell" ${DECOR} aria-hidden="true"><svg viewBox="0 0 16 18"><path d="M8 1.5v1.8" stroke="#b07d12" stroke-width="1.4" stroke-linecap="round"/><path d="M3 13c1-1 1-3 1-5a4 4 0 0 1 8 0c0 2 0 4 1 5Z" fill="#f2c14e"/><path d="M5.2 8a2.8 2.8 0 0 1 2.2-2.7" stroke="#fff3c4" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M2.5 13h11" stroke="#b07d12" stroke-width="1.2" stroke-linecap="round"/><circle class="ideas-bell-clapper" cx="8" cy="15" r="1.6" fill="#b07d12"/><path d="M5 2.6 8 4l3-1.4" stroke="#d9363e" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span>`;
+  const titleFlake = `<span class="ideas-title-flake" ${DECOR} aria-hidden="true">${flake}</span>`;
+  const noteFlake = `<span class="ideas-note-flake" ${DECOR} aria-hidden="true">${flake}</span>`;
   const holly = `<span class="ideas-holly" ${DECOR} aria-hidden="true"><svg viewBox="0 0 24 16"><path d="M12 9C9 3 4 4 1 6c3 0 3 3 6 2-1 2 1 4 5 1Z" fill="#2f8a5c"/><path d="M12 9c3-6 8-5 11-3-3 0-3 3-6 2 1 2-1 4-5 1Z" fill="#246b48"/><circle class="ideas-orn" cx="10.5" cy="9.5" r="2.2" fill="#d94b45"/><circle class="ideas-orn" cx="13.5" cy="9.5" r="2.2" fill="#e85d55"/><circle class="ideas-orn" cx="12" cy="7" r="2.2" fill="#c9372f"/></svg></span>`;
 
   // ── Colocación en espacios reservados ───────────────────────────────────────
@@ -81,7 +114,7 @@
     layer.setAttribute(DECOR, '');
     layer.setAttribute('aria-hidden', 'true');
     // La guirnalda vive en el relleno superior (20 px) y la nieve, detrás del texto.
-    layer.innerHTML = garland({ bulbs: innerWidth < 380 ? 11 : 14, sag: 5, segments: 4, height: 12, cls: 'ideas-garland--hero' }) + `<span class="ideas-hero-snow">${snow(innerWidth < 380 ? 8 : 12, 190)}</span>` + '<span class="ideas-hero-drift"></span>';
+    layer.innerHTML = garland({ bulbs: innerWidth < 380 ? 11 : 14, sag: 5, segments: 4, height: 12, cls: 'ideas-garland--hero' }) + `<span class="ideas-hero-snow">${snow(innerWidth < 380 ? 8 : 12, 190)}${glints(4, 'ideas-glint--hero', [62, 96, 18, 82])}</span>` + '<span class="ideas-hero-drift"></span>';
     hero.prepend(layer);
   }
   function decorateProfile(head) {
@@ -102,9 +135,9 @@
         const rad = angle * Math.PI / 180;
         ring += bulb(i, `left:calc(50% + ${Math.sin(rad).toFixed(4)} * var(--rr));top:calc(50% - ${Math.cos(rad).toFixed(4)} * var(--rr));--rot:${(angle + 180).toFixed(0)}deg`);
       }
-      layer.innerHTML = `<span class="ideas-avatar-ring"><svg viewBox="0 0 100 100"><path d="M${(50 + 46 * Math.sin(-160 * Math.PI / 180)).toFixed(2)} ${(50 - 46 * Math.cos(-160 * Math.PI / 180)).toFixed(2)}A46 46 0 1 1 ${(50 + 46 * Math.sin(115 * Math.PI / 180)).toFixed(2)} ${(50 - 46 * Math.cos(115 * Math.PI / 180)).toFixed(2)}"/></svg>${ring}<span class="ideas-avatar-bow"><svg viewBox="0 0 24 14"><path d="M12 7C8 1 2 1 2 5s6 5 10 2Zm0 0c4-6 10-6 10-2s-6 5-10 2Z" fill="#d94b45"/><path d="m11 8-4 6 3-1 1 2Zm2 0 4 6-3-1-1 2Z" fill="#b8352f"/><circle cx="12" cy="7" r="2" fill="#f06a60"/></svg></span></span>` +
-        `<span class="ideas-avatar-side ideas-avatar-side--left">${tree()}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--small')}</span>` +
-        `<span class="ideas-avatar-side ideas-avatar-side--right">${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--small')}${tree('ideas-tree--flip')}</span>`;
+      layer.innerHTML = `<span class="ideas-avatar-ring"><svg viewBox="0 0 100 100"><path d="M${(50 + 46 * Math.sin(-160 * Math.PI / 180)).toFixed(2)} ${(50 - 46 * Math.cos(-160 * Math.PI / 180)).toFixed(2)}A46 46 0 1 1 ${(50 + 46 * Math.sin(115 * Math.PI / 180)).toFixed(2)} ${(50 - 46 * Math.cos(115 * Math.PI / 180)).toFixed(2)}"/></svg>${ring}<span class="ideas-avatar-bow"><svg viewBox="0 0 24 14"><path d="M12 7C8 1 2 1 2 5s6 5 10 2Zm0 0c4-6 10-6 10-2s-6 5-10 2Z" fill="#d94b45"/><path d="m11 8-4 6 3-1 1 2Zm2 0 4 6-3-1-1 2Z" fill="#b8352f"/><circle cx="12" cy="7" r="2" fill="#f06a60"/></svg></span><span class="ideas-avatar-orbit"><i></i><i></i></span></span>` +
+        `<span class="ideas-avatar-side ideas-avatar-side--left"><span class="ideas-side-snow">${snow(5, 96)}</span>${tree()}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--small')}</span>` +
+        `<span class="ideas-avatar-side ideas-avatar-side--right"><span class="ideas-side-snow">${snow(5, 96)}</span>${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--small')}${tree('ideas-tree--flip')}</span>`;
       head.prepend(layer);
     }
     // Posición calculada a partir de la foto real (no tapa el nombre: se reserva margen en CSS).
@@ -127,11 +160,16 @@
     scene.className = 'ideas-xmas-scene';
     scene.setAttribute(DECOR, '');
     scene.setAttribute('aria-hidden', 'true');
-    scene.innerHTML = garland({ bulbs: innerWidth < 380 ? 12 : 16, sag: 8, segments: 5, height: 16, cls: 'ideas-garland--scene' }) +
-      '<span class="ideas-scene-moon"></span>' + snow(18, 150) +
-      '<div class="ideas-scene-text"><strong>¡Felices fiestas!</strong><span>Instituto IDEAS te desea una feliz Navidad</span></div>' +
+    // Capas de atrás hacia adelante: cielo (aurora, estrellas, luna, estrella fugaz), trineo,
+    // colinas, cabaña y adornos, nieve, textos. El texto y la cuenta regresiva quedan siempre encima.
+    scene.innerHTML = '<span class="ideas-aurora"><i></i><i></i></span>' + glints(innerWidth < 380 ? 9 : 12, 'ideas-glint--sky', [4, 96, 8, 52]) +
+      '<span class="ideas-scene-moon"></span><span class="ideas-shooting"><i></i></span>' +
+      `<span class="ideas-sleigh"><span class="ideas-sleigh-bob">${sleigh}</span></span>` +
       '<span class="ideas-scene-hill ideas-scene-hill--back"></span><span class="ideas-scene-hill ideas-scene-hill--front"></span>' +
-      `<span class="ideas-scene-props">${tree('ideas-tree--a')}${tree('ideas-tree--b')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--a')}${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--b')}${gift('#37996a', '#2a7a53', '#ff9ecb', 'ideas-gift--c')}${tree('ideas-tree--c')}${snowman}</span>`;
+      `<span class="ideas-scene-props">${cabin}<span class="ideas-smoke"><i></i><i></i><i></i></span>${tree('ideas-tree--a')}${tree('ideas-tree--b')}${cane('ideas-cane--a')}${cane('ideas-cane--b')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--a')}${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--b')}${gift('#37996a', '#2a7a53', '#ff9ecb', 'ideas-gift--c')}${tree('ideas-tree--c')}${snowman}</span>` +
+      `<span class="ideas-scene-snow">${snow(22, 180)}</span>` +
+      garland({ bulbs: innerWidth < 380 ? 12 : 16, sag: 8, segments: 5, height: 16, cls: 'ideas-garland--scene' }) +
+      `<div class="ideas-scene-text"><strong>¡Felices fiestas!</strong><span>Instituto IDEAS te desea una feliz Navidad</span><em class="ideas-countdown">${countdown()}</em></div>`;
     const note = page.querySelector(':scope > .sa-sync-note');
     if (note) note.before(scene); else page.append(scene);
   }
@@ -140,7 +178,20 @@
     document.querySelectorAll('.profile-head').forEach(decorateProfile);
     document.querySelectorAll('.page').forEach((page) => { if (page.querySelector(':scope > .hero')) decorateHome(page); });
     document.querySelectorAll('.view .large-title__kicker').forEach((kicker) => {
-      if (kicker.closest('.view')?.querySelector('.hero') && !kicker.querySelector('.ideas-holly')) kicker.insertAdjacentHTML('beforeend', holly);
+      if (kicker.closest('.view')?.querySelector('.hero') && !kicker.querySelector('.ideas-holly')) kicker.insertAdjacentHTML('beforeend', holly + bell);
+    });
+    // Copo que gira junto al título «Modo Navidad» (alumnos, personal y trabajadores).
+    document.querySelectorAll('[data-ideas-season-toggle], #toggle-temporada').forEach((input) => {
+      const title = input.closest('.list-row')?.querySelector('.list-row__main > span:first-child');
+      if (title && !title.querySelector('.ideas-title-flake')) title.insertAdjacentHTML('beforeend', titleFlake);
+    });
+    // Copitos en la nota inferior de cada pantalla.
+    document.querySelectorAll('.sa-sync-note').forEach((note) => {
+      if (!note.querySelector('.ideas-note-flake')) { note.insertAdjacentHTML('afterbegin', noteFlake); note.insertAdjacentHTML('beforeend', noteFlake); }
+    });
+    // Paisaje nevado al pie del login (bloque propio debajo de todo).
+    document.querySelectorAll('.login').forEach((login) => {
+      if (!login.querySelector(':scope > .ideas-login-scene')) login.insertAdjacentHTML('beforeend', `<div class="ideas-login-scene" ${DECOR} aria-hidden="true"><span class="ideas-scene-snow">${snow(10, 70)}</span><span class="ideas-login-hill"></span>${tree('ideas-tree--l1')}${tree('ideas-tree--l2')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--l')}${snowman}${tree('ideas-tree--l3')}</div>`);
     });
     document.querySelectorAll('.brand-lockup').forEach((lockup) => {
       if (!lockup.previousElementSibling?.matches('.ideas-garland--login')) lockup.insertAdjacentHTML('beforebegin', garland({ bulbs: 9, sag: 6, segments: 3, height: 14, cls: 'ideas-garland--login' }));
@@ -148,6 +199,13 @@
     if (adminWeb()) document.querySelectorAll('.sidebar-brand').forEach((brand) => {
       if (!brand.querySelector(':scope > .ideas-garland--admin')) brand.insertAdjacentHTML('beforeend', garland({ bulbs: 10, sag: 5, segments: 3, height: 12, cls: 'ideas-garland--admin' }));
     });
+  }
+  // Las animaciones fuera de la pantalla se pausan (ahorra batería y mantiene fluido el desplazamiento).
+  const visibility = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => entries.forEach((entry) => setClass(entry.target, 'ideas-offscreen', !entry.isIntersecting)), { rootMargin: '60px' }) : null;
+  const watched = new WeakSet();
+  function watchVisibility() {
+    if (!visibility) return;
+    document.querySelectorAll('.ideas-xmas-scene,.ideas-hero-decor,.ideas-avatar-decor,.ideas-login-scene').forEach((el) => { if (!watched.has(el)) { watched.add(el); visibility.observe(el); } });
   }
   function undecorate() {
     document.querySelectorAll(`[${DECOR}]`).forEach((el) => el.remove());
@@ -242,7 +300,7 @@
     document.querySelectorAll('[data-ideas-christmas-play]').forEach((input) => sync(input, null, !enabled()));
     setClass(document.documentElement, 'ideas-christmas-still', reduced());
     const active = enabled();
-    if (active) decorate(); else undecorate();
+    if (active) { decorate(); watchVisibility(); } else undecorate();
     const now = signedIn();
     if (!now && wasSignedIn) { played = false; try { sessionStorage.removeItem('ideas-christmas-played'); } catch {} stopMusic(); }
     wasSignedIn = now;
