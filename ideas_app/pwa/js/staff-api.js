@@ -2,8 +2,6 @@ import { getServerKey } from './server-context.js';
 import { getDeviceId, clearSession } from './auth.js';
 import { clearStudentSession } from './student-api.js';
 const KEY='ideas-personal-session:v1';
-// Consultas del panel que solo leen: se repiten una vez si la red se corta sin respuesta.
-const READS=new Set(['panel','buscar_alumnos','ficha_alumno','trabajadores','trabajador','leer_credencial']);
 export function staffSession(){
   try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.server===getServerKey()&&s.expires>Date.now()&&/^[a-f0-9]{64}$/.test(s.token)&&['asistencia','intranet'].includes(s.identity?.origen))return s;localStorage.removeItem(KEY);}catch{}return null;
 }
@@ -24,7 +22,7 @@ async function request(endpoint,body,{authenticated=false,signal}={}){
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000),cancel=()=>controller.abort();signal?.addEventListener('abort',cancel,{once:true});if(signal?.aborted)controller.abort();
   try{
     const url=new URL(String(window.APP_API_URL||'../api/').replace(/\/$/,'')+'/'+endpoint,location.href).href;
-    const response=await (window.ideasFetch||fetch)(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify({...body,...(authenticated?{token_sesion:token}:{}),device_token:getDeviceId()})},endpoint==='personal_app.php'&&READS.has(body?.accion));
+    const response=await fetch(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify({...body,...(authenticated?{token_sesion:token}:{}),device_token:getDeviceId()})});
     const result=await response.json();
     if(server!==getServerKey()||(authenticated&&staffSession()?.token!==token))throw new Error('La cuenta o el servidor cambiaron durante la consulta.');
     if(!response.ok||result.success!==true){if(response.status===401&&authenticated)forgetStaffSession();throw Object.assign(new Error(result.message||'No se pudo completar la solicitud.'),{status:response.status});}

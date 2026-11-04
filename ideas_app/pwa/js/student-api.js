@@ -47,7 +47,7 @@ export async function studentRequest(accion, values={}) {
   const requestToken=localStorage.getItem(TOKEN)||'';
   const controller=new AbortController(); const timer=setTimeout(()=>controller.abort(),15000);
   try {
-    const response=await (window.ideasFetch||fetch)(endpoint,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify({accion,...values,...(accion==='login'?{}:{token_sesion:requestToken})})},accion==='perfil'||accion==='cambios');
+    const response=await fetch(endpoint,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify({accion,...values,...(accion==='login'?{}:{token_sesion:requestToken})})});
     let result; try { result=await response.json(); } catch { throw new Error('El servidor no devolvió una respuesta válida.'); }
     if(!result||typeof result!=='object'||typeof result.success!=='boolean')throw new Error('El servidor no devolvió una respuesta válida.');
     if(base!==studentServerKey().replace(/\/$/,'')||(accion!=='login'&&requestToken!==(localStorage.getItem(TOKEN)||'')))throw new Error('El servidor o la sesión cambió durante la solicitud. Ingresa nuevamente.');

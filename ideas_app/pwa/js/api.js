@@ -11,8 +11,6 @@ export const API_BASE_URL = window.APP_API_URL || '../api/';
 // historial, ingreso, marcación, perfil) salen primero; las secundarias esperan a que terminen,
 // como máximo 1,5 s, para no competir por el servidor. Nunca se descarta una consulta.
 const SECONDARY = /^(permisos|correcciones|notificaciones|cambios_app|v1\/anuncios\/listar|estado_servidor)\.php/;
-// Consultas que solo leen: si la red se corta sin respuesta, se repiten una vez (ver net-retry.js).
-const READ_ONLY = /^(estado_servidor|get_perfil|jornada|historial|permisos|correcciones|notificaciones|cambios_app|v1\/anuncios\/listar)\.php/;
 let priorityInFlight = 0;
 const priorityWaiters = new Set();
 function releasePriority() {
@@ -75,7 +73,7 @@ async function sendRequest(endpoint, options = {}) {
   };
 
   try {
-    const response = await (window.ideasFetch || fetch)(url, config, READ_ONLY.test(endpoint.replace(/^\//, '')));
+    const response = await fetch(url, config);
     let data;
     let invalidResponse = false;
     try {

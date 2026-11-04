@@ -47,7 +47,7 @@ function seed({ kind, KEY, worker, student, off, lite, full }) {
   const token = 'a'.repeat(64);
   if (kind === 'admin') localStorage.setItem('ideas-personal-session:v1', JSON.stringify({ identity: { id: 7, nombre: 'M', rol: 'administrador', origen: 'asistencia' }, token, server: KEY, expires: Date.now() + 3600e3 }));
   if (kind === 'alumno') { localStorage.setItem('asistencia_user', JSON.stringify({ tipo: 'alumno', id: 'alumno_42', alumno_id: 42, dni: '33333333', nombre: 'Carlos Mendoza', server_key: KEY })); localStorage.setItem('asistencia_token', token); localStorage.setItem('ideas-student-cache', JSON.stringify({ savedAt: Date.now(), server_key: KEY, alumno_id: 42, data: student })); }
-  if (kind === 'trabajador') { localStorage.setItem('asistencia_user', JSON.stringify({ ...worker, server_key: KEY })); localStorage.setItem('asistencia_token', token); }
+  if (kind === 'trabajador') { localStorage.setItem('asistencia_user', JSON.stringify(worker)); localStorage.setItem('asistencia_token', token); }
   localStorage.setItem('ideas-navidad-musica', 'off');
   if (off) localStorage.setItem('ideas-temporada', 'off');
 }

@@ -199,11 +199,6 @@ export function render(container) {
           <span class="list-row__main"><span>Instalar en iPhone</span></span>
           <span class="list-row__end">${ICON_CHEVRON}</span>
         </button>`}
-        <button type="button" id="btn-net-test" class="list-row" aria-haspopup="dialog">
-          ${rowIcon('wifi', 'blue')}
-          <span class="list-row__main"><span>Probar conexión</span><span class="list-row__sub">Compara Wi-Fi y datos móviles</span></span>
-          <span class="list-row__end">${ICON_CHEVRON}</span>
-        </button>
         <div class="list-row">
           ${rowIcon('smartphone', 'gray')}
           <span class="list-row__main"><span>Ejecución</span></span>
@@ -964,11 +959,6 @@ export async function init() {
       try { window.AndroidNet.openServerSettings(); } catch (_) {}
     });
   }
-
-  // Prueba de conexión con el servidor (se carga al abrirla)
-  $('#btn-net-test')?.addEventListener('click', () => {
-    import('../js/connection-test.js').then((m) => m.openConnectionTest()).catch(() => showToast('No se pudo abrir la prueba de conexión.', 'warning'));
-  });
 
   // Guía de instalación en iPhone
   const btnInstallGuide = $('#btn-open-install-guide');

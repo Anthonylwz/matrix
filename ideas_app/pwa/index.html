@@ -21,7 +21,7 @@
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>IDEAS Alumnos</title>
-  <meta name="application-version" content="4.2.4">
+  <meta name="application-version" content="4.2.3">
 
   <!-- Configuración PWA estándar -->
   <link rel="manifest" href="manifest.json">
@@ -62,9 +62,9 @@
         else if (user && user.tipo === 'alumno' && localStorage.getItem('asistencia_token')) kind = 'alumno';
       } catch (e) {}
       var lists = {
-        personal: ['j:entry.js','j:staff-api.js','j:net-retry.js','j:auth.js','j:server-context.js','j:student-api.js','j:student-server.js','j:icons.js','j:biometric.js','j:app-runtime.js','j:db.js','j:theme.js','j:utils.js','j:sheet.js','j:scanner.js','j:staff-app.js','j:contact-links.js','j:personal-web-login.js'],
-        alumno: ['j:entry.js','j:staff-api.js','j:net-retry.js','j:auth.js','j:server-context.js','j:student-api.js','j:student-server.js','j:icons.js','j:biometric.js','j:app-runtime.js','j:db.js','j:theme.js','j:utils.js','j:sheet.js','j:scanner.js','j:student-app.js','j:student-push.js','j:student-web-login.js','j:student-biometric.js','j:student-settings.js','j:student-attendance.js','j:student-model.js','j:student-mark-queue.js','j:location.js'],
-        trabajador: ['j:app.js','j:utils.js','j:sheet.js','j:router.js','j:auth.js','j:server-context.js','j:db.js','j:api.js','j:net-retry.js','j:sync.js','j:install.js','j:icons.js','j:security.js','j:scanner.js','j:location.js','j:theme.js','j:biometric.js','j:viewer.js','j:photo.js','j:push.js','j:notifications.js','p:login.js','p:home.js','p:scanner.js','p:history.js','p:requests.js','p:permissions.js','p:corrections.js','p:profile.js','p:notifications.js']
+        personal: ['j:entry.js','j:staff-api.js','j:auth.js','j:server-context.js','j:student-api.js','j:student-server.js','j:icons.js','j:biometric.js','j:app-runtime.js','j:db.js','j:theme.js','j:utils.js','j:sheet.js','j:scanner.js','j:staff-app.js','j:contact-links.js','j:personal-web-login.js'],
+        alumno: ['j:entry.js','j:staff-api.js','j:auth.js','j:server-context.js','j:student-api.js','j:student-server.js','j:icons.js','j:biometric.js','j:app-runtime.js','j:db.js','j:theme.js','j:utils.js','j:sheet.js','j:scanner.js','j:student-app.js','j:student-push.js','j:student-web-login.js','j:student-biometric.js','j:student-settings.js','j:student-attendance.js','j:student-model.js','j:student-mark-queue.js','j:location.js'],
+        trabajador: ['j:app.js','j:utils.js','j:sheet.js','j:router.js','j:auth.js','j:server-context.js','j:db.js','j:api.js','j:sync.js','j:install.js','j:icons.js','j:security.js','j:scanner.js','j:location.js','j:theme.js','j:biometric.js','j:viewer.js','j:photo.js','j:push.js','j:notifications.js','p:login.js','p:home.js','p:scanner.js','p:history.js','p:requests.js','p:permissions.js','p:corrections.js','p:profile.js','p:notifications.js']
       };
       lists[kind].forEach(function (h) {
         var l = document.createElement('link');
@@ -75,12 +75,12 @@
     })();
   </script>
   <!-- Estilos base nativos iOS -->
-  <link rel="stylesheet" href="css/app.css?v=4.2.4">
+  <link rel="stylesheet" href="css/app.css?v=4.2.3">
   <link rel="stylesheet" href="../public/ideas-season.css?v=31">
   <script defer src="../public/ideas-season.js?v=31"></script>
 <script>window.IDEAS_STUDENT_APP=true;</script><link rel="stylesheet" href="css/student-app.css?v=23">
 <link rel="stylesheet" href="css/theme-motion.css?v=2">
-<link rel="stylesheet" href="css/staff-app.css?v=4.2.4">
+<link rel="stylesheet" href="css/staff-app.css?v=4.2.3">
 </head>
 <body>
   <div id="sa-splash" role="status" aria-label="Cargando"><span class="spinner"></span></div>

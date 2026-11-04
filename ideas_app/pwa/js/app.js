@@ -1,6 +1,4 @@
 // Punto de entrada principal de la PWA Asistencia Ideas
-// Reintento de consultas de lectura tras un corte de red: se carga antes que todo lo demás.
-import './net-retry.js';
 import { $, setConnectionStatus, showToast, resolveMediaUrl } from './utils.js';
 import { getUser } from './auth.js';
 import { initRouter } from './router.js';
