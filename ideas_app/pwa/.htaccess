@@ -1,0 +1,32 @@
+# Configuración Apache / cPanel para PWA Asistencia Ideas
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest .json
+  AddType text/javascript .js .mjs
+  AddType image/svg+xml .svg
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Prevenir que el Service Worker se quede atascado en la caché HTTP del navegador
+  <FilesMatch "service-worker\.js$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+    Header set Service-Worker-Allowed "/"
+  </FilesMatch>
+
+  # Código de la app: el navegador siempre pregunta si cambió (respuesta 304 si no),
+  # así una versión nueva llega sin quedar atrapada en la caché HTTP
+  <FilesMatch "\.(js|html|json)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+
+  # Cachear recursos estáticos con huella de versión
+  <FilesMatch "\.(css|svg|png|jpg|jpeg|gif|ico|woff|woff2)$">
+    Header set Cache-Control "max-age=2592000, public"
+  </FilesMatch>
+
+  # Seguridad básica para PWA
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

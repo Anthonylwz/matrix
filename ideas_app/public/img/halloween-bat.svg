@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60">
+ <defs>
+  <linearGradient id="wing" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#706078"/><stop offset=".48" stop-color="#393044"/><stop offset="1" stop-color="#211c2a"/></linearGradient>
+  <linearGradient id="fur" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#65566c"/><stop offset=".55" stop-color="#322a3d"/><stop offset="1" stop-color="#191520"/></linearGradient>
+ </defs>
+ <!-- Scalloped membranes, with finger bones and fine folds. -->
+ <path fill="url(#wing)" stroke="#96839e" stroke-opacity=".6" stroke-width="1.2" d="M56 24 C45 18 31 7 3 4 C12 13 13 21 12 29 C22 24 29 29 31 39 C40 34 48 38 51 47 L60 54 L69 47 C72 38 80 34 89 39 C91 29 98 24 108 29 C107 21 108 13 117 4 C89 7 75 18 64 24 Z"/>
+ <g fill="none" stroke="#b39cbd" stroke-width="1.4" stroke-linecap="round" opacity=".52">
+  <path d="M55 26 Q30 13 4 5 M55 26 Q25 16 12 28 M55 26 Q35 23 31 38 M55 26 Q47 33 51 46 M65 26 Q90 13 116 5 M65 26 Q95 16 108 28 M65 26 Q85 23 89 38 M65 26 Q73 33 69 46"/>
+ </g>
+ <g fill="none" stroke="#baa2c4" stroke-width=".8" opacity=".22">
+  <path d="M16 12 Q30 14 46 23 M20 19 Q35 20 47 27 M35 29 Q43 29 50 32 M104 12 Q90 14 74 23 M100 19 Q85 20 73 27 M85 29 Q77 29 70 32"/>
+ </g>
+ <!-- Pointed ears and a softly textured body. -->
+ <path fill="url(#fur)" stroke="#95819f" stroke-width="1" d="M53 22 L50 10 L58 17 Q60 15 62 17 L70 10 L67 22 Q72 29 67 39 L65 43 L63 42 L60 51 L57 42 L55 43 L53 39 Q48 29 53 22 Z"/>
+ <path fill="#ad899f" opacity=".48" d="M53 15 L56 20 L54 22 Z M67 15 L64 20 L66 22 Z"/>
+ <path fill="none" stroke="#ac93b5" stroke-width=".9" stroke-linecap="round" opacity=".42" d="M56 29 L55 32 M60 27 L59 31 M64 29 L63 33 M58 35 L57 38 M62 35 L61 39"/>
+ <path fill="#e0b076" d="M54 25 L58 26 L56 28 Z M66 25 L62 26 L64 28 Z"/>
+</svg>
