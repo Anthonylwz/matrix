@@ -26,38 +26,47 @@
   const signedIn = () => adminWeb() || (app() && !document.getElementById('login-form') && !/login/.test(location.hash) &&
     (document.body.classList.contains('student-mode') || (!document.body.classList.contains('no-bottom-nav') && Boolean(read('asistencia_user')) && read('asistencia_bloqueada') !== '1')));
   const blocked = () => document.hidden || document.body.classList.contains('is-immersive');
+  // Celulares con poca memoria, pocos núcleos o «ahorro de datos»: la mitad de copos y menos bombillas.
+  const LITE = (() => { try { return (navigator.deviceMemory || 8) <= 3 || (navigator.hardwareConcurrency || 8) <= 4 || Boolean(navigator.connection?.saveData); } catch { return false; } })();
+  const qty = (n) => Math.max(1, Math.round(LITE ? n * 0.5 : n));
+  const lights = (n) => Math.max(6, Math.round(LITE ? n * 0.75 : n));
 
   // ── Piezas gráficas ──────────────────────────────────────────────────────────
   const BULBS = [['#ff6b5e', '#a3241b'], ['#ffd166', '#b07d12'], ['#6fd39a', '#23774a'], ['#6cb8ff', '#1f5d9e'], ['#ff9ecb', '#a8406f']];
   const rand = (min, max) => min + Math.random() * (max - min);
   const bulb = (i, style) => {
     const [c, d] = BULBS[i % BULBS.length];
-    // Retraso por posición = luces «en cadena»; cada bombilla oscila con su propio periodo.
-    return `<i class="ideas-bulb" style="--c:${c};--d:${d};--tw:${(i * -0.23).toFixed(2)}s;--sd:${(i % 5) * -0.7}s;--sp:${(2.6 + (i % 3) * 0.45).toFixed(2)}s;${style}"></i>`;
+    return `<i class="ideas-bulb" style="--c:${c};--d:${d};${style}"></i>`;
   };
+  // Las bombillas se reparten en 4 fases, como un controlador real de luces: cada fase se enciende
+  // y se mece como un grupo (4 animaciones por guirnalda en vez de dos por bombilla).
+  const phases = (items) => [0, 1, 2, 3].map((k) => `<span class="ideas-bulbs ideas-bulbs--${k}">${items.filter((_, i) => i % 4 === k).join('')}</span>`).join('');
   // Guirnalda con caída suave entre puntos de sujeción; las bombillas cuelgan del cable.
   function garland({ bulbs = 14, sag = 7, segments = 4, height = 16, cls = '' } = {}) {
     const y = (x) => 1.5 + sag * Math.sin(Math.PI * ((x % (100 / segments)) / (100 / segments)));
     let d = '';
     for (let x = 0; x <= 100; x += 1) d += `${x ? 'L' : 'M'}${x} ${y(x).toFixed(2)}`;
-    let lights = '';
+    const items = [];
     for (let i = 0; i < bulbs; i++) {
       const x = (i + 0.5) * (100 / bulbs);
       const slope = (y(x + 0.5) - y(x - 0.5)) * 2.2;
-      lights += bulb(i, `left:${x.toFixed(2)}%;top:${(y(x) - 0.5).toFixed(2)}px;--rot:${Math.max(-28, Math.min(28, slope * 6)).toFixed(1)}deg`);
+      items.push(bulb(i, `left:${x.toFixed(2)}%;top:${(y(x) - 0.5).toFixed(2)}px;--rot:${Math.max(-28, Math.min(28, slope * 6)).toFixed(1)}deg`));
     }
+    const lights = phases(items);
     return `<span class="ideas-garland ${cls}" ${DECOR} aria-hidden="true" style="--gh:${height}px"><svg viewBox="0 0 100 ${height}" preserveAspectRatio="none"><path d="${d}" vector-effect="non-scaling-stroke"/></svg>${lights}</span>`;
   }
   const flake = '<svg viewBox="0 0 20 20"><path d="M10 1v18M2.2 5.5l15.6 9M2.2 14.5l15.6-9M10 4 8 2M10 4l2-2M10 16l-2 2M10 16l2 2"/></svg>';
   // Tres planos: los copos cercanos son más grandes, opacos y rápidos; los lejanos, pequeños y lentos.
   function snow(count, fall) {
     let out = '';
+    count = qty(count);
     for (let i = 0; i < count; i++) {
       const depth = i % 3; // 0 lejos · 1 medio · 2 cerca
       const size = rand([2.5, 3.5, 5][depth], [3.5, 5, 8.5][depth]);
       const shape = depth === 2 && i % 2 === 0 ? flake : '';
       const dur = rand([11, 8.5, 6.5][depth], [14, 10.5, 8][depth]);
-      out += `<i class="ideas-flake${shape ? ' ideas-flake--star' : ''}" style="left:${rand(0, 100).toFixed(1)}%;--s:${size.toFixed(1)}px;--dur:${dur.toFixed(1)}s;--delay:${rand(-dur, 0).toFixed(1)}s;--fall:${fall}px;--o:${[0.45, 0.65, 0.9][depth]};--sway:${rand(6, 16).toFixed(0)}px;--sd:${rand(2.4, 4.2).toFixed(1)}s"><b>${shape}</b></i>`;
+      const sway = rand(5, 15) * (Math.random() < 0.5 ? -1 : 1);
+      out += `<i class="ideas-flake${shape ? ' ideas-flake--star' : ''}" style="left:${rand(0, 100).toFixed(1)}%;--s:${size.toFixed(1)}px;--dur:${dur.toFixed(1)}s;--delay:${rand(-dur, 0).toFixed(1)}s;--fall:${fall}px;--o:${[0.45, 0.65, 0.9][depth]};--sway:${sway.toFixed(0)}px${shape ? `;--sd:${rand(2.4, 4.2).toFixed(1)}s` : ''}"><b>${shape}</b></i>`;
     }
     return out;
   }
@@ -89,49 +98,52 @@
   // Árbol con vida: se mece desde el tronco (grupo interior, así no choca con la posición del SVG),
   // tiene luces que corren por la guirnalda y, de vez en cuando, se le cae nieve de las ramas.
   const TREE_LIGHTS = [[13, 23.6], [16.5, 24.9], [20.5, 25], [24.5, 23.9], [27.5, 22], [9, 38.6], [13.5, 40.4], [18.5, 41.3], [23.5, 41.1], [28.5, 39.7], [31.5, 37.8]];
-  const tree = (cls = '') => {
-    const flip = cls.includes('ideas-tree--flip');
-    const lights = TREE_LIGHTS.map(([x, y], i) => `<circle class="ideas-tree-light" cx="${x}" cy="${y}" r="1" fill="${BULBS[i % BULBS.length][0]}" style="animation-delay:${(i * -0.18).toFixed(2)}s"/>`).join('');
-    return `<svg class="ideas-tree ${cls}" viewBox="0 0 40 56" aria-hidden="true"><g class="ideas-tree-sway" style="animation-delay:${rand(-6, 0).toFixed(1)}s"><g${flip ? ' transform="matrix(-1 0 0 1 40 0)"' : ''}>
-    <path d="M17 45h6v9h-6z" fill="#7a5235"/><path d="M17 45h3v9h-3z" fill="#946645"/>
+  // Las piezas animadas se arman por capas: cada parte que se mueve es un SVG o elemento propio.
+  // Animar partes DENTRO de un SVG obliga a repintarlo entero en cada cuadro; una capa propia la mueve la GPU.
+  const layer = (cls, inner, vb = '0 0 40 56') => `<svg class="${cls}" viewBox="${vb}" aria-hidden="true">${inner}</svg>`;
+  const TREE_BASE = `<path d="M17 45h6v9h-6z" fill="#7a5235"/><path d="M17 45h3v9h-3z" fill="#946645"/>
     <path d="M20 17 38 45H2Z" fill="#2f8a5c"/><path d="M20 17 38 45H20Z" fill="#246b48"/>
     <path d="M20 7 34 31H6Z" fill="#37996a"/><path d="M20 7 34 31H20Z" fill="#2a7a53"/>
     <path d="M14 22l3-5M24 37l4-6M10 40l3-4" stroke="#3fae78" stroke-width=".8" stroke-linecap="round" opacity=".7"/>
     <path d="M6 31q14 5 28 0M2 45q18 6 36 0" fill="none" stroke="#f4f8fb" stroke-width="2.4" stroke-linecap="round" opacity=".92"/>
-    <path class="ideas-tinsel" d="M11 22q9 5 18-1M7 37q13 6 26-1" fill="none" stroke="#f2c14e" stroke-width="1.1" stroke-dasharray="1.6 1.4"/>
-    ${lights}
-    <circle class="ideas-orn" cx="13" cy="28" r="1.9" fill="#ff6b5e"/><circle class="ideas-orn" cx="26" cy="27" r="1.7" fill="#6cb8ff"/>
-    <circle class="ideas-orn" cx="11" cy="43" r="2" fill="#ffd166"/><circle class="ideas-orn" cx="21" cy="33" r="1.8" fill="#ff9ecb"/>
-    <circle class="ideas-orn" cx="30" cy="43" r="1.9" fill="#ff6b5e"/>
-    <circle class="ideas-tree-drop" cx="6.5" cy="31.5" r="1.3" fill="#fff" style="animation-delay:${rand(-9, 0).toFixed(1)}s"/>
-    <circle class="ideas-tree-drop" cx="34" cy="45.5" r="1.2" fill="#fff" style="animation-delay:${rand(-9, 0).toFixed(1)}s"/>
-    <circle class="ideas-tree-halo" cx="20" cy="6.6" r="5" fill="#ffd166"/>
-    <path class="ideas-tree-rays" d="M20-2.6v3.4M20 12.4v3M11 6.6h3.4M26 6.6h3.4" stroke="#ffe39a" stroke-width="1" stroke-linecap="round"/>
-    <path class="ideas-tree-star" d="M20 .8l1.9 3.9 4.3.6-3.1 3 .7 4.3L20 10.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z" fill="#ffd166"/>
-  </g></g></svg>`;
+    <path d="M11 22q9 5 18-1M7 37q13 6 26-1" fill="none" stroke="#f2c14e" stroke-width="1.1" stroke-dasharray="1.6 1.4"/>
+    <circle cx="13" cy="28" r="1.9" fill="#ff6b5e"/><circle cx="26" cy="27" r="1.7" fill="#6cb8ff"/><circle cx="11" cy="43" r="2" fill="#ffd166"/><circle cx="21" cy="33" r="1.8" fill="#ff9ecb"/><circle cx="30" cy="43" r="1.9" fill="#ff6b5e"/>
+    <g fill="#fff" opacity=".9"><circle cx="13.6" cy="27.3" r=".55"/><circle cx="26.5" cy="26.4" r=".5"/><circle cx="11.6" cy="42.3" r=".55"/><circle cx="21.6" cy="32.4" r=".5"/><circle cx="30.6" cy="42.3" r=".55"/></g>`;
+  const TREE_STAR = '<path d="M20 .8l1.9 3.9 4.3.6-3.1 3 .7 4.3L20 10.6l-3.8 2 .7-4.3-3.1-3 4.3-.6z" fill="#ffd166"/><path d="M20 2.6l1 2.2 2.2.3" fill="none" stroke="#fff6cf" stroke-width=".7" stroke-linecap="round"/>';
+  const tree = (cls = '') => {
+    const flip = cls.includes('ideas-tree--flip');
+    const g = (inner) => flip ? `<g transform="matrix(-1 0 0 1 40 0)">${inner}</g>` : inner;
+    const group = (odd) => TREE_LIGHTS.filter((_, i) => i % 2 === (odd ? 1 : 0)).map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="1.05" fill="${BULBS[(i * 2 + (odd ? 1 : 0)) % BULBS.length][0]}"/>`).join('');
+    const [dx, dy] = Math.random() < 0.5 ? [6.5, 31.5] : [34, 45.5];
+    return `<span class="ideas-tree ${cls}" aria-hidden="true" style="--td:${rand(-6, 0).toFixed(1)}s">` +
+      layer('ideas-tree-base', g(TREE_BASE)) + layer('ideas-tree-lights', g(group(false))) + layer('ideas-tree-lights ideas-tree-lights--b', g(group(true))) +
+      '<i class="ideas-tree-halo"></i>' + layer('ideas-tree-star', TREE_STAR) +
+      `<i class="ideas-tree-drop" style="left:${((flip ? 40 - dx : dx) / 40 * 100).toFixed(1)}%;top:${(dy / 56 * 100).toFixed(1)}%;animation-delay:${rand(-9, 0).toFixed(1)}s"></i></span>`;
   };
   const gift = (a, b, ribbon, cls = '') => `<svg class="ideas-gift ${cls}" viewBox="0 0 20 18" aria-hidden="true" style="--hop:${rand(-7, 0).toFixed(1)}s"><rect x="1.5" y="6.5" width="17" height="11" rx="1.5" fill="${a}"/><rect x="10" y="6.5" width="8.5" height="11" rx="1.5" fill="${b}"/><rect x=".5" y="3.8" width="19" height="4" rx="1.2" fill="${a}"/><rect x="8.6" y="3.8" width="2.8" height="13.7" fill="${ribbon}"/><path d="M10 3.8C7 0 3.5 1.6 6.3 3.8M10 3.8c3-3.8 6.5-2.2 3.7 0" fill="none" stroke="${ribbon}" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-  const snowman = '<svg class="ideas-snowman" viewBox="0 0 40 56" aria-hidden="true"><g class="ideas-snowman-body">' +
-    '<ellipse cx="20" cy="43" rx="15" ry="12" fill="#f3f8fb" stroke="#9db7c6"/><path d="M8 47q12 8 24 0" fill="none" stroke="#d7e6ee" stroke-width="3"/><path d="M27 36q5 3 6 9" fill="none" stroke="#dbe8ef" stroke-width="2" stroke-linecap="round"/>' +
-    '<circle cx="20" cy="40" r="1.3" fill="#304d53"/><circle cx="20" cy="45" r="1.3" fill="#304d53"/><circle cx="20" cy="50" r="1.3" fill="#304d53"/>' +
-    '<path d="m7 39-5-8m2.4 3.8-2.6.6" stroke="#8d7664" stroke-width="2" stroke-linecap="round"/><path class="ideas-snowman-wave" d="m33 39 5-8m-2.4 3.8 2.6.6" stroke="#8d7664" stroke-width="2" stroke-linecap="round"/>' +
-    '<g class="ideas-snowman-head"><circle cx="20" cy="25" r="10" fill="#fbfdfe" stroke="#9db7c6"/><circle cx="14.6" cy="27.4" r="1.8" fill="#f4a3a3" opacity=".55"/><circle cx="25.4" cy="27.4" r="1.8" fill="#f4a3a3" opacity=".55"/>' +
-    '<g class="ideas-snowman-eyes"><circle cx="17" cy="23.6" r="1.2" fill="#304d53"/><circle cx="23" cy="23.6" r="1.2" fill="#304d53"/><circle cx="17.4" cy="23.2" r=".35" fill="#fff"/><circle cx="23.4" cy="23.2" r=".35" fill="#fff"/></g>' +
-    '<path d="m20 25.6 8 2-8 2" fill="#e08a3a"/><path d="M16 29.4q4 2.6 8 0" fill="none" stroke="#304d53" stroke-width=".9" stroke-linecap="round" stroke-dasharray=".1 1.6"/>' +
-    '<g class="ideas-snowman-hat"><path d="M10 17h21" stroke="#304d53" stroke-width="3" stroke-linecap="round"/><path d="M14 16V7h13v9Z" fill="#304d53"/><path d="M14 13.5h13" stroke="#c9483f" stroke-width="2"/><circle cx="24.5" cy="13.5" r="1.4" fill="#2f8a5c"/><circle cx="25.6" cy="12.6" r=".7" fill="#d9363e"/></g></g>' +
-    '<path d="M12 32h16l-4 5-12-2" fill="#c9483f"/><path d="M14 33.5h12" stroke="#ffd166" stroke-width="1" stroke-dasharray="1.5 1.5"/>' +
-    '<path class="ideas-scarf-tail" d="M23 34.5l2.5 9.5 3.4-1-2.2-8.8Z" fill="#b8352f"/><path class="ideas-scarf-tail" d="M24.5 39.5l3-.8" stroke="#ffd166" stroke-width=".9"/></g>' +
-    '<g class="ideas-breath"><circle cx="29" cy="27" r="1.6" fill="#fff"/><circle cx="31.5" cy="25" r="1.2" fill="#fff"/></g></svg>';
+  const SM_BODY = '<ellipse cx="20" cy="43" rx="15" ry="12" fill="#f3f8fb" stroke="#9db7c6"/><path d="M8 47q12 8 24 0" fill="none" stroke="#d7e6ee" stroke-width="3"/><path d="M27 36q5 3 6 9" fill="none" stroke="#dbe8ef" stroke-width="2" stroke-linecap="round"/>' +
+    '<circle cx="20" cy="40" r="1.3" fill="#304d53"/><circle cx="20" cy="45" r="1.3" fill="#304d53"/><circle cx="20" cy="50" r="1.3" fill="#304d53"/><path d="m7 39-5-8m2.4 3.8-2.6.6" stroke="#8d7664" stroke-width="2" stroke-linecap="round"/>';
+  const SM_HEAD = '<circle cx="20" cy="25" r="10" fill="#fbfdfe" stroke="#9db7c6"/><circle cx="14.6" cy="27.4" r="1.8" fill="#f4a3a3" opacity=".55"/><circle cx="25.4" cy="27.4" r="1.8" fill="#f4a3a3" opacity=".55"/>' +
+    '<path d="m20 25.6 8 2-8 2" fill="#e08a3a"/><path d="M16 29.4q4 2.6 8 0" fill="none" stroke="#304d53" stroke-width=".9" stroke-linecap="round" stroke-dasharray=".1 1.6"/>';
+  const SM_EYES = '<circle cx="17" cy="23.6" r="1.2" fill="#304d53"/><circle cx="23" cy="23.6" r="1.2" fill="#304d53"/><circle cx="17.4" cy="23.2" r=".35" fill="#fff"/><circle cx="23.4" cy="23.2" r=".35" fill="#fff"/>';
+  const SM_HAT = '<path d="M10 17h21" stroke="#304d53" stroke-width="3" stroke-linecap="round"/><path d="M14 16V7h13v9Z" fill="#304d53"/><path d="M14 13.5h13" stroke="#c9483f" stroke-width="2"/><circle cx="24.5" cy="13.5" r="1.4" fill="#2f8a5c"/><circle cx="25.6" cy="12.6" r=".7" fill="#d9363e"/>';
+  const SM_SCARF = '<path d="M12 32h16l-4 5-12-2" fill="#c9483f"/><path d="M14 33.5h12" stroke="#ffd166" stroke-width="1" stroke-dasharray="1.5 1.5"/>';
+  const SM_TAIL = '<path d="M23 34.5l2.5 9.5 3.4-1-2.2-8.8Z" fill="#b8352f"/><path d="M24.5 39.5l3-.8M25.4 42.4l2.6-.7" stroke="#ffd166" stroke-width=".9"/>';
+  const snowman = '<span class="ideas-snowman" aria-hidden="true"><span class="sm-breathe">' + layer('sm-part', SM_BODY) +
+    layer('sm-part sm-arm', '<path d="m33 39 5-8m-2.4 3.8 2.6.6" stroke="#8d7664" stroke-width="2" stroke-linecap="round"/>') +
+    '<span class="sm-head">' + layer('sm-part', SM_HEAD) + layer('sm-part sm-eyes', SM_EYES) + layer('sm-part sm-hat', SM_HAT) + '</span>' +
+    layer('sm-part', SM_SCARF) + layer('sm-part sm-scarf', SM_TAIL) + layer('sm-part sm-breath', '<circle cx="29" cy="27" r="1.6" fill="#fff"/><circle cx="31.5" cy="25" r="1.2" fill="#fff"/>') + '</span></span>';
   // Trineo con dos renos genéricos (dibujo propio).
-  const reindeer = (x) => `<g class="ideas-deer" transform="translate(${x} 0)"><path d="M2 12q1-5 8-5 4 0 6 2l3-4 1 1-2 4q1 2-1 3-2 1-7 1-6 0-8-2Z" fill="#9a6a44"/><path d="M5 13q4 2 10 0" stroke="#c99b70" stroke-width="1.4" fill="none"/><path d="M19 5l-1-3m1 3 2-2m-2 2-3-2" stroke="#6e4a2e" stroke-width=".9" stroke-linecap="round"/><circle cx="20.6" cy="8.4" r=".9" fill="#3a2a20"/><g class="ideas-legs"><path d="M5 13l-2 5M8 13l1 5M13 13l-1 5M15 12l3 5" stroke="#6e4a2e" stroke-width="1.2" stroke-linecap="round"/></g></g>`;
+  const reindeer = (x) => `<g transform="translate(${x} 0)"><path d="M2 12q1-5 8-5 4 0 6 2l3-4 1 1-2 4q1 2-1 3-2 1-7 1-6 0-8-2Z" fill="#9a6a44"/><path d="M5 13q4 2 10 0" stroke="#c99b70" stroke-width="1.4" fill="none"/><path d="M19 5l-1-3m1 3 2-2m-2 2-3-2" stroke="#6e4a2e" stroke-width=".9" stroke-linecap="round"/><circle cx="20.6" cy="8.4" r=".9" fill="#3a2a20"/></g>`;
+  const legs = (x, cls) => layer('ideas-sleigh-legs ' + cls, `<path transform="translate(${x} 0)" d="M5 13l-2 5M8 13l1 5M13 13l-1 5M15 12l3 5" stroke="#6e4a2e" stroke-width="1.2" stroke-linecap="round"/>`, '0 0 96 24');
   const sleigh = `<svg class="ideas-sleigh-art" viewBox="0 0 96 24" aria-hidden="true"><path d="M30 13c10 0 16-1 22-3M50 11c10-1 14-2 20-3" stroke="#f2c14e" stroke-width=".8" fill="none"/>${reindeer(48)}${reindeer(70)}<path d="M4 9q-2 7 6 8h20q4 0 5-5l1-4H12q-4 0-4 3" fill="#c9372f"/><path d="M10 10h22" stroke="#ffd166" stroke-width="1"/><path d="M2 20h30q4 0 5-3" stroke="#ffd166" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M8 17v3M28 17v3" stroke="#ffd166" stroke-width="1.2"/><path d="M14 8q-1-7 6-7t7 6Z" fill="#2f8a5c"/><rect x="21" y="2" width="5" height="5" rx="1" fill="#6cb8ff"/><path d="M23.5 2v5" stroke="#fff" stroke-width=".8"/></svg>`;
-  const cabin = `<svg class="ideas-cabin" viewBox="0 0 44 38" aria-hidden="true"><path d="M31 6h5v12h-5z" fill="#6e4a2e"/><path d="M30 4h7v3h-7z" fill="#f4f8fb"/><path d="M5 20h34v17H5z" fill="#8a5a3b"/><path d="M5 24h34M5 28h34M5 32h34" stroke="#6e4a2e" stroke-width=".8"/><path d="M1 21 22 6l21 15Z" fill="#7a3b2c"/><path d="M0 22 22 5.5 44 22l-2.5 1.5L22 9 2.5 23.5Z" fill="#f4f8fb"/><rect class="ideas-cabin-window" x="10" y="24" width="8" height="7" rx="1" fill="#ffd27a"/><path d="M14 24v7M10 27.5h8" stroke="#8a5a3b" stroke-width=".9"/><rect x="25" y="25" width="7" height="12" rx="1" fill="#5a3b26"/><circle cx="30.5" cy="31" r=".7" fill="#ffd166"/><path d="M3 37h38" stroke="#f4f8fb" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const cabin = `<svg class="ideas-cabin" viewBox="0 0 44 38" aria-hidden="true"><path d="M31 6h5v12h-5z" fill="#6e4a2e"/><path d="M30 4h7v3h-7z" fill="#f4f8fb"/><path d="M5 20h34v17H5z" fill="#8a5a3b"/><path d="M5 24h34M5 28h34M5 32h34" stroke="#6e4a2e" stroke-width=".8"/><path d="M1 21 22 6l21 15Z" fill="#7a3b2c"/><path d="M0 22 22 5.5 44 22l-2.5 1.5L22 9 2.5 23.5Z" fill="#f4f8fb"/><rect x="10" y="24" width="8" height="7" rx="1" fill="#ffd27a"/><path d="M14 24v7M10 27.5h8" stroke="#8a5a3b" stroke-width=".9"/><rect x="25" y="25" width="7" height="12" rx="1" fill="#5a3b26"/><circle cx="30.5" cy="31" r=".7" fill="#ffd166"/><path d="M3 37h38" stroke="#f4f8fb" stroke-width="2" stroke-linecap="round"/></svg>`;
   const cane = (cls) => `<svg class="ideas-cane ${cls}" viewBox="0 0 12 26" aria-hidden="true"><path d="M3 25V7a4 4 0 0 1 8 0" fill="none" stroke="#fdfdfd" stroke-width="3.2" stroke-linecap="round"/><path d="M3 25V7a4 4 0 0 1 8 0" fill="none" stroke="#d9363e" stroke-width="3.2" stroke-linecap="round" stroke-dasharray="2.2 2.4"/></svg>`;
-  const bell = `<span class="ideas-bell" ${DECOR} aria-hidden="true"><svg viewBox="0 0 16 18"><path d="M8 1.5v1.8" stroke="#b07d12" stroke-width="1.4" stroke-linecap="round"/><path d="M3 13c1-1 1-3 1-5a4 4 0 0 1 8 0c0 2 0 4 1 5Z" fill="#f2c14e"/><path d="M5.2 8a2.8 2.8 0 0 1 2.2-2.7" stroke="#fff3c4" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M2.5 13h11" stroke="#b07d12" stroke-width="1.2" stroke-linecap="round"/><circle class="ideas-bell-clapper" cx="8" cy="15" r="1.6" fill="#b07d12"/><path d="M5 2.6 8 4l3-1.4" stroke="#d9363e" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span>`;
+  const bell = `<span class="ideas-bell" ${DECOR} aria-hidden="true"><svg viewBox="0 0 16 18"><path d="M8 1.5v1.8" stroke="#b07d12" stroke-width="1.4" stroke-linecap="round"/><path d="M3 13c1-1 1-3 1-5a4 4 0 0 1 8 0c0 2 0 4 1 5Z" fill="#f2c14e"/><path d="M5.2 8a2.8 2.8 0 0 1 2.2-2.7" stroke="#fff3c4" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M2.5 13h11" stroke="#b07d12" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="15" r="1.6" fill="#b07d12"/><path d="M5 2.6 8 4l3-1.4" stroke="#d9363e" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></span>`;
   // Esfera que cuelga en la esquina libre de las tarjetas de estadísticas.
   const tileOrnament = (i) => {
     const [c, d] = BULBS[i % BULBS.length];
-    return `<span class="ideas-tile-orn" ${DECOR} aria-hidden="true" style="animation-delay:${(i * -0.8).toFixed(1)}s"><svg viewBox="0 0 16 30"><path d="M8 0v11" stroke="#b9a37a" stroke-width=".8"/><rect x="5.6" y="10" width="4.8" height="3.4" rx="1" fill="#c9a94f"/><circle cx="8" cy="20" r="6.6" fill="${d}"/><circle cx="8" cy="20" r="6" fill="${c}"/><path d="M2.4 18.6q5.6 2.4 11.2 0M2.4 21.6q5.6 2.4 11.2 0" fill="none" stroke="#fff" stroke-width=".9" opacity=".6"/><ellipse class="ideas-orn-shine" cx="5.8" cy="17.4" rx="1.6" ry="2.2" fill="#fff" opacity=".7"/></svg></span>`;
+    return `<span class="ideas-tile-orn" ${DECOR} aria-hidden="true" style="animation-delay:${(i * -0.8).toFixed(1)}s"><svg viewBox="0 0 16 30"><path d="M8 0v11" stroke="#b9a37a" stroke-width=".8"/><rect x="5.6" y="10" width="4.8" height="3.4" rx="1" fill="#c9a94f"/><circle cx="8" cy="20" r="6.6" fill="${d}"/><circle cx="8" cy="20" r="6" fill="${c}"/><path d="M2.4 18.6q5.6 2.4 11.2 0M2.4 21.6q5.6 2.4 11.2 0" fill="none" stroke="#fff" stroke-width=".9" opacity=".6"/><ellipse cx="5.8" cy="17.4" rx="1.6" ry="2.2" fill="#fff" opacity=".7"/></svg></span>`;
   };
   // Íconos pequeños que acompañan a los títulos de sección (en línea, después del texto).
   const HEADER_ICONS = [
@@ -143,11 +155,11 @@
     ['flake', '<svg viewBox="0 0 20 20"><path d="M10 1v18M2.2 5.5l15.6 9M2.2 14.5l15.6-9M10 4 8 2M10 4l2-2M10 16l-2 2M10 16l2 2" fill="none" stroke="#5aa9e6" stroke-width="1.8" stroke-linecap="round"/></svg>'],
   ];
   const headerIcon = (i) => { const [kind, svg] = HEADER_ICONS[i % HEADER_ICONS.length]; return `<span class="ideas-head-icon ideas-head-icon--${kind}" ${DECOR} aria-hidden="true">${svg}</span>`; };
-  const lamp = '<svg class="ideas-lamp" viewBox="0 0 22 60" aria-hidden="true"><path d="M10 20h2v38h-2z" fill="#2f3b45"/><path d="M7 57h8v3H7z" fill="#2f3b45"/><path d="M5 9h12l-2 10H7Z" fill="#3a4a55"/><rect class="ideas-lamp-bulb" x="7.6" y="11" width="6.8" height="7" rx="1" fill="#ffd98a"/><path d="M4 9h14l-7-5Z" fill="#2f3b45"/><path d="M3.5 9.4q7.5-3 15 0" stroke="#f4f8fb" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="11" cy="32" r="4.2" fill="none" stroke="#2f8a5c" stroke-width="2.4"/><circle cx="9" cy="29.6" r=".9" fill="#d9363e"/><circle cx="13.6" cy="31" r=".9" fill="#d9363e"/><path d="M11 35.4l-2.4 3m2.4-3 2.4 3" stroke="#d9363e" stroke-width="1.3" stroke-linecap="round"/></svg>';
-  const penguin = '<svg class="ideas-penguin-art" viewBox="0 0 22 26" aria-hidden="true"><ellipse cx="11" cy="15" rx="7.4" ry="9" fill="#26323a"/><ellipse cx="11.8" cy="16.4" rx="4.8" ry="6.8" fill="#f7fafc"/><circle cx="11" cy="7.2" r="5.4" fill="#26323a"/><ellipse cx="12.4" cy="8.2" rx="3.4" ry="3" fill="#f7fafc"/><circle cx="13.2" cy="7.2" r=".9" fill="#26323a"/><path d="M15.4 8.4l3 1-3 .9Z" fill="#f2a43a"/><path d="M6 11.6h10" stroke="#d9363e" stroke-width="2.2" stroke-linecap="round"/><path d="M7 12.2l-1.2 4.2 2.4-.4Z" fill="#d9363e"/><path class="ideas-penguin-wing" d="M4.2 13q-3 4-1 8 2.4-1 2.6-4.4Z" fill="#1c262d"/><path d="M7 24h4M12 24h4" stroke="#f2a43a" stroke-width="2" stroke-linecap="round"/><path d="M7.5 2.4q3.5-3.4 7 0" fill="#d9363e"/><circle cx="11" cy=".9" r="1.2" fill="#fff"/></svg>';
+  const lamp = '<svg class="ideas-lamp" viewBox="0 0 22 60" aria-hidden="true"><path d="M10 20h2v38h-2z" fill="#2f3b45"/><path d="M7 57h8v3H7z" fill="#2f3b45"/><path d="M5 9h12l-2 10H7Z" fill="#3a4a55"/><rect x="7.6" y="11" width="6.8" height="7" rx="1" fill="#ffd98a"/><path d="M4 9h14l-7-5Z" fill="#2f3b45"/><path d="M3.5 9.4q7.5-3 15 0" stroke="#f4f8fb" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="11" cy="32" r="4.2" fill="none" stroke="#2f8a5c" stroke-width="2.4"/><circle cx="9" cy="29.6" r=".9" fill="#d9363e"/><circle cx="13.6" cy="31" r=".9" fill="#d9363e"/><path d="M11 35.4l-2.4 3m2.4-3 2.4 3" stroke="#d9363e" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  const penguin = '<svg class="ideas-penguin-art" viewBox="0 0 22 26" aria-hidden="true"><ellipse cx="11" cy="15" rx="7.4" ry="9" fill="#26323a"/><ellipse cx="11.8" cy="16.4" rx="4.8" ry="6.8" fill="#f7fafc"/><circle cx="11" cy="7.2" r="5.4" fill="#26323a"/><ellipse cx="12.4" cy="8.2" rx="3.4" ry="3" fill="#f7fafc"/><circle cx="13.2" cy="7.2" r=".9" fill="#26323a"/><path d="M15.4 8.4l3 1-3 .9Z" fill="#f2a43a"/><path d="M6 11.6h10" stroke="#d9363e" stroke-width="2.2" stroke-linecap="round"/><path d="M7 12.2l-1.2 4.2 2.4-.4Z" fill="#d9363e"/><path d="M7 24h4M12 24h4" stroke="#f2a43a" stroke-width="2" stroke-linecap="round"/><path d="M7.5 2.4q3.5-3.4 7 0" fill="#d9363e"/><circle cx="11" cy=".9" r="1.2" fill="#fff"/></svg>';
   const titleFlake = `<span class="ideas-title-flake" ${DECOR} aria-hidden="true">${flake}</span>`;
   const noteFlake = `<span class="ideas-note-flake" ${DECOR} aria-hidden="true">${flake}</span>`;
-  const holly = `<span class="ideas-holly" ${DECOR} aria-hidden="true"><svg viewBox="0 0 24 16"><path d="M12 9C9 3 4 4 1 6c3 0 3 3 6 2-1 2 1 4 5 1Z" fill="#2f8a5c"/><path d="M12 9c3-6 8-5 11-3-3 0-3 3-6 2 1 2-1 4-5 1Z" fill="#246b48"/><circle class="ideas-orn" cx="10.5" cy="9.5" r="2.2" fill="#d94b45"/><circle class="ideas-orn" cx="13.5" cy="9.5" r="2.2" fill="#e85d55"/><circle class="ideas-orn" cx="12" cy="7" r="2.2" fill="#c9372f"/></svg></span>`;
+  const holly = `<span class="ideas-holly" ${DECOR} aria-hidden="true"><svg viewBox="0 0 24 16"><path d="M12 9C9 3 4 4 1 6c3 0 3 3 6 2-1 2 1 4 5 1Z" fill="#2f8a5c"/><path d="M12 9c3-6 8-5 11-3-3 0-3 3-6 2 1 2-1 4-5 1Z" fill="#246b48"/><g><circle cx="10.5" cy="9.5" r="2.2" fill="#d94b45"/><circle cx="13.5" cy="9.5" r="2.2" fill="#e85d55"/><circle cx="12" cy="7" r="2.2" fill="#c9372f"/></g><circle cx="11.6" cy="6.3" r=".6" fill="#fff" opacity=".7"/></svg></span>`;
 
   // ── Colocación en espacios reservados ───────────────────────────────────────
   function decorateHero(hero) {
@@ -158,30 +170,32 @@
     layer.setAttribute(DECOR, '');
     layer.setAttribute('aria-hidden', 'true');
     // La guirnalda vive en el relleno superior (20 px) y la nieve, detrás del texto.
-    layer.innerHTML = garland({ bulbs: innerWidth < 380 ? 11 : 14, sag: 5, segments: 4, height: 12, cls: 'ideas-garland--hero' }) + `<span class="ideas-hero-snow">${snow(innerWidth < 380 ? 8 : 12, 190)}${glints(4, 'ideas-glint--hero', [62, 96, 18, 82])}</span>` + '<span class="ideas-hero-drift"></span>';
+    layer.innerHTML = garland({ bulbs: lights(innerWidth < 380 ? 11 : 14), sag: 5, segments: 4, height: 12, cls: 'ideas-garland--hero' }) + `<span class="ideas-hero-snow">${snow(innerWidth < 380 ? 7 : 9, 190)}${glints(4, 'ideas-glint--hero', [62, 96, 18, 82])}</span>` + '<span class="ideas-hero-drift"></span>';
     hero.prepend(layer);
   }
-  function decorateProfile(head) {
+  function decorateProfile(head, measure = false) {
     const target = head.querySelector(':scope > .avatar-edit, :scope > .avatar');
     if (!target) return;
     setClass(head, 'ideas-avatar-decorated');
     let layer = head.querySelector(':scope > .ideas-avatar-decor');
+    if (layer && !measure) return;
     if (!layer) {
       layer = document.createElement('span');
       layer.className = 'ideas-avatar-decor';
       layer.setAttribute(DECOR, '');
       layer.setAttribute('aria-hidden', 'true');
       // Aro de luces detrás de la foto, con un hueco abajo a la derecha para el botón de cámara.
-      let ring = '';
+      const ringItems = [];
       const count = 14;
       for (let i = 0; i < count; i++) {
         const angle = -150 + i * (255 / (count - 1));
         const rad = angle * Math.PI / 180;
-        ring += bulb(i, `left:calc(50% + ${Math.sin(rad).toFixed(4)} * var(--rr));top:calc(50% - ${Math.cos(rad).toFixed(4)} * var(--rr));--rot:${(angle + 180).toFixed(0)}deg`);
+        ringItems.push(bulb(i, `left:calc(50% + ${Math.sin(rad).toFixed(4)} * var(--rr));top:calc(50% - ${Math.cos(rad).toFixed(4)} * var(--rr));--rot:${(angle + 180).toFixed(0)}deg`));
       }
+      const ring = phases(ringItems);
       layer.innerHTML = `<span class="ideas-avatar-ring"><svg viewBox="0 0 100 100"><path d="M${(50 + 46 * Math.sin(-160 * Math.PI / 180)).toFixed(2)} ${(50 - 46 * Math.cos(-160 * Math.PI / 180)).toFixed(2)}A46 46 0 1 1 ${(50 + 46 * Math.sin(115 * Math.PI / 180)).toFixed(2)} ${(50 - 46 * Math.cos(115 * Math.PI / 180)).toFixed(2)}"/></svg>${ring}<span class="ideas-avatar-bow"><svg viewBox="0 0 24 14"><path d="M12 7C8 1 2 1 2 5s6 5 10 2Zm0 0c4-6 10-6 10-2s-6 5-10 2Z" fill="#d94b45"/><path d="m11 8-4 6 3-1 1 2Zm2 0 4 6-3-1-1 2Z" fill="#b8352f"/><circle cx="12" cy="7" r="2" fill="#f06a60"/></svg></span><span class="ideas-avatar-orbit"><i></i><i></i></span></span>` +
-        `<span class="ideas-avatar-side ideas-avatar-side--left"><span class="ideas-side-snow">${snow(5, 96)}</span>${tree()}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--small')}</span>` +
-        `<span class="ideas-avatar-side ideas-avatar-side--right"><span class="ideas-side-snow">${snow(5, 96)}</span>${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--small')}${tree('ideas-tree--flip')}</span>`;
+        `<span class="ideas-avatar-side ideas-avatar-side--left"><span class="ideas-side-snow">${snow(4, 96)}</span>${tree()}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--small')}</span>` +
+        `<span class="ideas-avatar-side ideas-avatar-side--right"><span class="ideas-side-snow">${snow(4, 96)}</span>${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--small')}${tree('ideas-tree--flip')}</span>`;
       head.prepend(layer);
     }
     // Posición calculada a partir de la foto real (no tapa el nombre: se reserva margen en CSS).
@@ -206,13 +220,13 @@
     scene.setAttribute('aria-hidden', 'true');
     // Capas de atrás hacia adelante: cielo (aurora, estrellas, luna, estrella fugaz), trineo,
     // colinas, cabaña y adornos, nieve, textos. El texto y la cuenta regresiva quedan siempre encima.
-    scene.innerHTML = '<span class="ideas-aurora"><i></i><i></i></span><span class="ideas-clouds"><span><i></i></span><span><i></i></span><span><i></i></span></span>' + glints(innerWidth < 380 ? 9 : 12, 'ideas-glint--sky', [4, 96, 8, 52]) +
+    scene.innerHTML = '<span class="ideas-aurora"><i></i><i></i></span><span class="ideas-clouds"><span><i></i></span><span><i></i></span><span><i></i></span></span>' + glints(qty(8), 'ideas-glint--sky', [4, 96, 8, 52]) +
       '<span class="ideas-scene-moon"></span><span class="ideas-shooting"><i></i></span>' +
-      `<span class="ideas-sleigh"><span class="ideas-sleigh-bob">${sleigh}</span></span>` +
+      `<span class="ideas-sleigh"><span class="ideas-sleigh-bob"><span class="ideas-stardust"><i></i><i></i><i></i><i></i></span>${sleigh}${legs(48, 'ideas-sleigh-legs--a')}${legs(70, 'ideas-sleigh-legs--b')}</span></span>` +
       '<span class="ideas-scene-hill ideas-scene-hill--back"></span><span class="ideas-scene-hill ideas-scene-hill--front"></span>' +
-      `<span class="ideas-scene-props">${cabin}<span class="ideas-smoke"><i></i><i></i><i></i></span>${tree('ideas-tree--a')}${tree('ideas-tree--b')}${cane('ideas-cane--a')}${cane('ideas-cane--b')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--a')}${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--b')}${gift('#37996a', '#2a7a53', '#ff9ecb', 'ideas-gift--c')}${tree('ideas-tree--c')}${snowman}</span>` +
-      `<span class="ideas-scene-snow">${snow(22, 180)}</span>` +
-      garland({ bulbs: innerWidth < 380 ? 12 : 16, sag: 8, segments: 5, height: 16, cls: 'ideas-garland--scene' }) +
+      `<span class="ideas-scene-props">${cabin}<i class="ideas-cabin-glow"></i><span class="ideas-smoke"><i></i><i></i><i></i></span>${tree('ideas-tree--a')}${tree('ideas-tree--b')}${cane('ideas-cane--a')}${cane('ideas-cane--b')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--a')}${gift('#3f86c9', '#2d6aa3', '#f4f8fb', 'ideas-gift--b')}${gift('#37996a', '#2a7a53', '#ff9ecb', 'ideas-gift--c')}${tree('ideas-tree--c')}${snowman}</span>` +
+      `<span class="ideas-scene-snow">${snow(16, 180)}</span>` +
+      garland({ bulbs: lights(innerWidth < 380 ? 12 : 16), sag: 8, segments: 5, height: 16, cls: 'ideas-garland--scene' }) +
       `<div class="ideas-scene-text"><strong>¡Felices fiestas!</strong><span>Instituto IDEAS te desea una feliz Navidad</span><em class="ideas-countdown">${countdown()}</em></div>`;
     setClass(scene, 'ideas-scene--' + skyMoment());
     const note = page.querySelector(':scope > .sa-sync-note');
@@ -250,7 +264,7 @@
     // Pie nevado (sección nueva al final) en las pantallas sin escena navideña.
     document.querySelectorAll('.view .view__content > .page').forEach((page) => {
       if (page.querySelector(':scope > .hero, :scope > .ideas-page-footer') || page.closest('.staff-skeleton') || page.querySelector('.staff-skeleton,.login')) return;
-      page.insertAdjacentHTML('beforeend', `<div class="ideas-page-footer" ${DECOR} aria-hidden="true"><span class="ideas-scene-snow">${snow(8, 76)}</span><span class="ideas-lamp-glow"></span>${lamp}<span class="ideas-footer-drift"></span><span class="ideas-penguin"><span class="ideas-penguin-turn"><span class="ideas-penguin-face"><span class="ideas-penguin-waddle">${penguin}</span></span></span></span>${tree('ideas-tree--f1')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--f')}${tree('ideas-tree--f2')}</div>`);
+      page.insertAdjacentHTML('beforeend', `<div class="ideas-page-footer" ${DECOR} aria-hidden="true"><span class="ideas-scene-snow">${snow(6, 76)}</span><span class="ideas-lamp-glow"></span>${lamp}<span class="ideas-footer-drift"></span><span class="ideas-penguin"><span class="ideas-penguin-turn"><span class="ideas-penguin-face"><span class="ideas-penguin-waddle">${penguin}${layer('ideas-penguin-wing', '<path d="M4.2 13q-3 4-1 8 2.4-1 2.6-4.4Z" fill="#1c262d"/>', '0 0 22 26')}</span></span></span></span>${tree('ideas-tree--f1')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--f')}${tree('ideas-tree--f2')}</div>`);
     });
     // Copo que gira junto al título «Modo Navidad» (alumnos, personal y trabajadores).
     document.querySelectorAll('[data-ideas-season-toggle], #toggle-temporada').forEach((input) => {
@@ -263,7 +277,7 @@
     });
     // Paisaje nevado al pie del login (bloque propio debajo de todo).
     document.querySelectorAll('.login').forEach((login) => {
-      if (!login.querySelector(':scope > .ideas-login-scene')) login.insertAdjacentHTML('beforeend', `<div class="ideas-login-scene" ${DECOR} aria-hidden="true"><span class="ideas-scene-snow">${snow(10, 70)}</span><span class="ideas-login-hill"></span>${tree('ideas-tree--l1')}${tree('ideas-tree--l2')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--l')}${snowman}${tree('ideas-tree--l3')}</div>`);
+      if (!login.querySelector(':scope > .ideas-login-scene')) login.insertAdjacentHTML('beforeend', `<div class="ideas-login-scene" ${DECOR} aria-hidden="true"><span class="ideas-scene-snow">${snow(8, 70)}</span><span class="ideas-login-hill"></span>${tree('ideas-tree--l1')}${tree('ideas-tree--l2')}${gift('#d94b45', '#b8352f', '#ffd166', 'ideas-gift--l')}${snowman}${tree('ideas-tree--l3')}</div>`);
     });
     document.querySelectorAll('.brand-lockup').forEach((lockup) => {
       if (!lockup.previousElementSibling?.matches('.ideas-garland--login')) lockup.insertAdjacentHTML('beforebegin', garland({ bulbs: 9, sag: 6, segments: 3, height: 14, cls: 'ideas-garland--login' }));
@@ -277,7 +291,7 @@
   const watched = new WeakSet();
   function watchVisibility() {
     if (!visibility) return;
-    document.querySelectorAll('.ideas-xmas-scene,.ideas-hero-decor,.ideas-avatar-decor,.ideas-login-scene,.ideas-page-footer').forEach((el) => { if (!watched.has(el)) { watched.add(el); visibility.observe(el); } });
+    document.querySelectorAll('.ideas-xmas-scene,.ideas-hero-decor,.ideas-avatar-decor,.ideas-login-scene,.ideas-page-footer,.ideas-tile-orn,.ideas-head-icon').forEach((el) => { if (!watched.has(el)) { watched.add(el); visibility.observe(el); } });
   }
   function undecorate() {
     document.querySelectorAll(`[${DECOR}]`).forEach((el) => el.remove());
@@ -287,7 +301,7 @@
   const observed = new WeakSet();
   const resizer = 'ResizeObserver' in window ? new ResizeObserver((entries) => {
     if (!enabled()) return;
-    requestAnimationFrame(() => entries.forEach((entry) => entry.target.isConnected && decorateProfile(entry.target)));
+    requestAnimationFrame(() => entries.forEach((entry) => entry.target.isConnected && decorateProfile(entry.target, true)));
   }) : null;
 
   // ── Vida: programas de luces y ráfagas de viento ─────────────────────────────
@@ -451,7 +465,11 @@
       update();
       return;
     }
-    if (event.target.matches('[data-ideas-season-toggle]')) { save('ideas-temporada', event.target.checked ? 'on' : 'off'); window.dispatchEvent(new Event('ideas:temporada')); }
+    if (event.target.matches('[data-ideas-season-toggle], #toggle-temporada')) {
+      if (event.target.matches('[data-ideas-season-toggle]')) save('ideas-temporada', event.target.checked ? 'on' : 'off');
+      if (event.target.checked) { setRootData('data-ideas-entrada', '1'); setTimeout(() => setRootData('data-ideas-entrada', null), 1100); }
+      window.dispatchEvent(new Event('ideas:temporada'));
+    }
   });
   // El navegador exige un gesto antes de sonar: el primer toque dentro de la sesión lo inicia.
   document.addEventListener('pointerdown', (event) => {
@@ -468,7 +486,8 @@
   const ours = (node) => node.nodeType !== 1 || node.hasAttribute?.(DECOR) || Boolean(node.closest?.(`[${DECOR}]`));
   let queued = false;
   new MutationObserver((records) => {
-    if (records.every((r) => ours(r.target) || (r.type === 'childList' && [...r.addedNodes, ...r.removedNodes].every(ours)))) return;
+    const root = document.documentElement, body = document.body;
+    if (records.every((r) => ours(r.target) || (r.type === 'attributes' && r.target !== root && r.target !== body) || (r.type === 'childList' && [...r.addedNodes, ...r.removedNodes].every(ours)))) return;
     if (!queued) { queued = true; requestAnimationFrame(() => { queued = false; update(); }); }
   }).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'data-temporada', 'data-movimiento'] });
   update();

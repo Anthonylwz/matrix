@@ -114,7 +114,7 @@ const seedAdmin = ({ KEY, TOKEN }) => {
     assert.ok(await page.$$eval('.ios-card.ideas-frost', (n) => n.length) >= 2, 'Escarcha en las tarjetas');
     assert.ok(await page.$$eval('.stat-tile > .ideas-tile-orn', (n) => n.length) >= 3, 'Esferas en las estadísticas');
     assert.ok(await page.$$eval('.ideas-head-icon', (n) => n.length) >= 3, 'Íconos junto a los títulos');
-    for (const sel of ['.ideas-clouds', '.ideas-tree-sway', '.ideas-tree-light', '.ideas-tree-drop', '.ideas-snowman-hat', '.ideas-scarf-tail', '.ideas-breath'])
+    for (const sel of ['.ideas-clouds', '.ideas-tree-lights', '.ideas-tree-halo', '.ideas-tree-drop', '.ideas-stardust', '.ideas-bulbs--3', '.sm-hat', '.sm-scarf', '.sm-breath', '.sm-eyes', '.ideas-sleigh-legs'])
       assert.ok(await page.$(sel), `Falta ${sel}`);
     assert.match(await page.$eval('.ideas-xmas-scene', (el) => el.className), /ideas-scene--(dia|tarde|noche)/, 'Cielo según la hora');
     assert.ok(['cadena', 'destello', 'alterno', 'respira'].includes(await page.evaluate(() => document.documentElement.dataset.ideasLuces)), 'Programa de luces activo');
@@ -142,7 +142,8 @@ const seedAdmin = ({ KEY, TOKEN }) => {
     assert.ok(await page.$('.ideas-avatar-decor'), 'Encender los repone');
     await page.evaluate(() => document.body.classList.add('is-immersive'));
     assert.equal(await page.$eval('.ideas-avatar-decor', (el) => getComputedStyle(el).display), 'none');
-    // Sin bucle de mutaciones: tras estabilizar, no siguen cambiando nodos.
+    // Sin bucle de mutaciones: tras estabilizar (el observador de visibilidad marca una vez lo que está fuera de pantalla), no siguen cambiando nodos.
+    await page.waitForTimeout(700);
     const churn = await page.evaluate(() => new Promise((r) => { let n = 0; const o = new MutationObserver((m) => { n += m.length; }); o.observe(document.body, { childList: true, subtree: true, attributes: true }); setTimeout(() => { o.disconnect(); r(n); }, 1500); }));
     assert.equal(churn, 0, 'Sin bucle de repintado');
     assert.deepEqual(errors, []);

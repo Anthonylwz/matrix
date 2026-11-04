@@ -8,7 +8,7 @@ firma/debug.keystore, de modo que se instala encima de la versión actual.
 
 Uso:
   python reempaquetar_apk.py --base dist/ideas-alumnos-prueba-4.1.7.apk \
-      --keystore firma/debug.keystore --apksig apksig-2.3.0.jar --out dist/ideas-alumnos-prueba-4.2.0.apk
+      --keystore firma/debug.keystore --apksig apksig-2.3.0.jar --out dist/ideas-alumnos-prueba-4.2.1.apk
 La compilación completa con crear_apk_alumnos.py sigue siendo válida en una PC con Android SDK.
 """
 from pathlib import Path
@@ -27,8 +27,8 @@ p.add_argument('--keystore', type=Path, required=True)
 p.add_argument('--apksig', type=Path, required=True, help='apksig-2.3.0.jar (Maven Central)')
 p.add_argument('--alias', default='androiddebugkey')
 p.add_argument('--password', default='android')
-p.add_argument('--version', default='4.2.0')
-p.add_argument('--version-code', type=int, default=42000)
+p.add_argument('--version', default='4.2.1')
+p.add_argument('--version-code', type=int, default=42001)
 args = p.parse_args()
 
 web_version = re.search(r"APP_VERSION\s*=\s*'([^']+)'", (ROOT / 'pwa/js/utils.js').read_text(encoding='utf-8'))[1]

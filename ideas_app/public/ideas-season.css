@@ -27,17 +27,22 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 
 /* Bombilla con casquillo, reflejo y halo. Solo se animan transform y opacity
    (los procesa la GPU: no hay tirones al desplazar la pantalla). */
-@property --sw{syntax:'<angle>';inherits:false;initial-value:0deg}
+/* Todo el movimiento de las bombillas va por la GPU (transform y opacity); el vaivén usa
+   var(--rot) dentro de los fotogramas, que Chrome resuelve por elemento sin el hilo principal. */
 .ideas-bulb{position:absolute;width:7px;height:10px;margin-left:-3.5px;border-radius:50% 50% 46% 46%/58% 58% 42% 42%;
   background:radial-gradient(circle at 34% 28%,rgba(255,255,255,.95) 0 14%,rgba(255,255,255,.35) 22%,transparent 32%),radial-gradient(circle at 50% 62%,var(--c) 0 42%,var(--d) 100%);
   box-shadow:0 0 4px 1px var(--c),inset 0 -1px 2px rgba(0,0,0,.25);
-  transform-origin:50% -3px;transform:translateY(3px) rotate(calc(var(--rot,0deg) + var(--sw)));
-  animation:ideas-chase 2.8s ease-in-out var(--tw,0s) infinite,ideas-swing var(--sp,3s) ease-in-out var(--sd,0s) infinite;will-change:transform,opacity}
+  --ty:3px;transform-origin:50% -3px;transform:translateY(var(--ty)) rotate(var(--rot,0deg))}
+/* Fases: cada grupo se enciende con curva de bombilla incandescente (rápido al prender, lento al apagar)
+   y se mece levemente; los 4 desfases forman las luces que «corren» por la guirnalda. */
+.ideas-bulbs{position:absolute;inset:0;animation:ideas-chase 2.4s cubic-bezier(.45,0,.2,1) infinite,ideas-jiggle 3.1s cubic-bezier(.37,0,.63,1) infinite}
+.ideas-bulbs--1{animation-delay:-.6s,-.8s;animation-duration:2.4s,3.5s}.ideas-bulbs--2{animation-delay:-1.2s,-1.9s;animation-duration:2.4s,2.8s}.ideas-bulbs--3{animation-delay:-1.8s,-.4s;animation-duration:2.4s,3.8s}
+@keyframes ideas-jiggle{0%,100%{transform:translate(-.6px,0)}50%{transform:translate(.6px,.5px)}}
 .ideas-bulb::before{content:"";position:absolute;left:1px;top:-3px;width:5px;height:4px;border-radius:1.5px 1.5px .5px .5px;background:linear-gradient(90deg,#2f4a3c,#7d9c86 50%,#2f4a3c)}
-.ideas-bulb::after{content:"";position:absolute;left:-3.5px;top:-2px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,var(--c) 0,transparent 62%);opacity:.45;animation:ideas-halo 2.8s ease-in-out var(--tw,0s) infinite}
-@keyframes ideas-chase{0%,100%{opacity:1}50%{opacity:.42}}
-@keyframes ideas-halo{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:.06;transform:scale(.65)}}
-@keyframes ideas-swing{0%,100%{--sw:-5deg}50%{--sw:5deg}}
+.ideas-bulb::after{content:"";position:absolute;left:-4px;top:-2.5px;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle,var(--c) 0,transparent 64%);opacity:.5}
+/* Encendido rápido y apagado lento, como una bombilla incandescente. */
+@keyframes ideas-chase{0%,100%{opacity:1}12%{opacity:.96}55%{opacity:.4}70%{opacity:.5}}
+
 
 /* Guirnalda */
 .ideas-garland{position:relative;display:block;height:var(--gh,16px);pointer-events:none}
@@ -49,21 +54,18 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 .ideas-garland--admin{margin:8px 0 2px;width:100%}
 
 /* Nieve (solo dentro de su contenedor): el copo cae y, por separado, se mece de lado. */
-.ideas-flake{position:absolute;top:-12px;width:var(--s);height:var(--s);opacity:0;
-  animation:ideas-fall var(--dur,8s) linear var(--delay,0s) infinite;will-change:transform,opacity}
-.ideas-flake>b{display:block;width:100%;height:100%;border-radius:50%;
-  background:radial-gradient(circle,#fff 0 36%,rgba(255,255,255,.45) 60%,transparent 72%);
-  animation:ideas-sway var(--sd,3s) ease-in-out var(--delay,0s) infinite alternate}
-.ideas-flake--star>b{background:none;border-radius:0;animation-name:ideas-sway-spin}
+.ideas-flake{position:absolute;top:-12px;width:var(--s);height:var(--s);opacity:0;animation:ideas-fall var(--dur,8s) linear var(--delay,0s) infinite}
+.ideas-flake>b{display:block;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle,#fff 0 36%,rgba(255,255,255,.45) 60%,transparent 72%)}
+.ideas-flake--star>b{background:none;border-radius:0;animation:ideas-flutter var(--sd,3s) ease-in-out var(--delay,0s) infinite alternate}
 .ideas-flake--star path{stroke:#fff;stroke-width:1.7;stroke-linecap:round;fill:none}
-@keyframes ideas-fall{0%{opacity:0;transform:translateY(0)}10%{opacity:var(--o,.7)}86%{opacity:var(--o,.7)}100%{opacity:0;transform:translateY(var(--fall,160px))}}
-@keyframes ideas-sway{from{transform:translateX(calc(var(--sway,10px) * -1))}to{transform:translateX(var(--sway,10px))}}
-@keyframes ideas-sway-spin{from{transform:translateX(calc(var(--sway,10px) * -1)) rotate(0)}to{transform:translateX(var(--sway,10px)) rotate(150deg)}}
+/* El copo baja a velocidad constante y se mece de lado siguiendo una curva (una sola animación). */
+@keyframes ideas-fall{0.0%{opacity:0;transform:translate(calc(var(--sway,10px) * 0.000),calc(var(--fall,160px) * 0.0000))}8.33%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * 0.707),calc(var(--fall,160px) * 0.0833))}16.67%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * 1.000),calc(var(--fall,160px) * 0.1667))}25.0%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * 0.707),calc(var(--fall,160px) * 0.2500))}33.33%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * 0.000),calc(var(--fall,160px) * 0.3333))}41.67%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * -0.707),calc(var(--fall,160px) * 0.4167))}50.0%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * -1.000),calc(var(--fall,160px) * 0.5000))}58.33%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * -0.707),calc(var(--fall,160px) * 0.5833))}66.67%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * -0.000),calc(var(--fall,160px) * 0.6667))}75.0%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * 0.707),calc(var(--fall,160px) * 0.7500))}83.33%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * 1.000),calc(var(--fall,160px) * 0.8333))}91.67%{opacity:var(--o,.7);transform:translate(calc(var(--sway,10px) * 0.707),calc(var(--fall,160px) * 0.9167))}100.0%{opacity:0;transform:translate(calc(var(--sway,10px) * 0.000),calc(var(--fall,160px) * 1.0000))}}
+@keyframes ideas-flutter{from{transform:rotate(0) rotateY(0)}to{transform:rotate(170deg) rotateY(65deg)}}
 
 /* Destello de cuatro puntas */
 .ideas-glint{position:absolute;width:var(--g,6px);height:var(--g,6px);margin:calc(var(--g,6px) / -2) 0 0 calc(var(--g,6px) / -2);
   background:radial-gradient(circle,#fff 0 20%,#fff6d1 45%,rgba(255,246,209,.6) 70%);clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%);
-  opacity:.15;animation:ideas-glint var(--gd,3s) ease-in-out var(--gl,0s) infinite;will-change:transform,opacity}
+  opacity:.15;animation:ideas-glint var(--gd,3s) ease-in-out var(--gl,0s) infinite}
 @keyframes ideas-glint{0%,100%{opacity:.12;transform:scale(.45) rotate(0)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
 
 /* Héroe: luces en el relleno superior, nieve y textura detrás del texto */
@@ -92,25 +94,27 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 .ideas-avatar-decor--square .ideas-avatar-side--right{left:calc(100% + 32px)}
 .ideas-avatar-ring>svg{position:absolute;inset:0;width:100%;height:100%}
 .ideas-avatar-ring>svg path{fill:none;stroke:#3c6e57;stroke-width:1.4;stroke-dasharray:3 1.2;opacity:.75}
-.ideas-avatar-ring .ideas-bulb{transform:translate(0,-5px) rotate(calc(var(--rot) + var(--sw) * .6));transform-origin:50% 50%}
+.ideas-avatar-ring .ideas-bulb{--ty:-5px;transform-origin:50% 50%}
 .ideas-avatar-bow{position:absolute;left:50%;top:-6px;width:24px;height:14px;margin-left:-12px}
 .ideas-avatar-side{position:absolute;bottom:-2px;display:flex;align-items:flex-end;gap:2px}
 .ideas-avatar-side--left{right:calc(100% + 26px)}
 .ideas-avatar-side--right{left:calc(100% + 26px)}
-.ideas-avatar-side .ideas-tree{width:38px;height:53px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
+.ideas-avatar-side .ideas-tree{width:38px;height:53px}
 .ideas-avatar-side .ideas-gift--small{width:17px;height:15px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
 .ideas-avatar-decor--narrow .ideas-avatar-side{display:none}
 @keyframes ideas-ring-breathe{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
 
+.ideas-tree>svg{position:absolute;inset:0}
+html body [data-ideas-decor] :is(.ideas-tree,.sm-breathe,.sm-head,.ideas-sleigh-bob,.ideas-penguin-waddle)>svg{width:100%;height:100%}
+.ideas-tree-base{filter:drop-shadow(0 2px 2px rgba(0,0,0,.2))}
 /* Árbol: estrella con halo y rayos, adornos que titilan a distinto ritmo */
-.ideas-tree-star{transform-box:fill-box;transform-origin:center;animation:ideas-star 4s ease-in-out infinite}
-.ideas-tree-halo{transform-box:fill-box;transform-origin:center;opacity:.25;animation:ideas-halo-pulse 4s ease-in-out infinite}
-.ideas-tree-rays{transform-origin:20px 6.6px;animation:ideas-rays 5s linear infinite}
-.ideas-orn{animation:ideas-chase 2.6s ease-in-out infinite}
-.ideas-orn:nth-of-type(2n){animation-duration:3.3s;animation-delay:-1.2s}.ideas-orn:nth-of-type(3n){animation-duration:2.1s;animation-delay:-2s}
+.ideas-tree-halo{position:absolute;left:50%;top:11.8%;width:52%;aspect-ratio:1;margin:-26% 0 0 -26%;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,220,120,.9) 0,rgba(255,220,120,.35) 22%,rgba(255,220,120,0) 42%),repeating-conic-gradient(rgba(255,227,154,.85) 0 5deg,transparent 5deg 45deg);
+  -webkit-mask-image:radial-gradient(circle,#000 0 34%,rgba(0,0,0,.5) 48%,transparent 66%);mask-image:radial-gradient(circle,#000 0 34%,rgba(0,0,0,.5) 48%,transparent 66%);
+  opacity:.5;animation:ideas-star-glow 5s cubic-bezier(.45,0,.55,1) var(--td,0s) infinite}
+@keyframes ideas-star-glow{0%{opacity:.35;transform:rotate(0) scale(.82)}50%{opacity:.85;transform:rotate(45deg) scale(1.08)}100%{opacity:.35;transform:rotate(90deg) scale(.82)}}
+@keyframes ideas-orns{0%,100%{opacity:1}50%{opacity:.72}}
 @keyframes ideas-star{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.16) rotate(10deg)}}
-@keyframes ideas-halo-pulse{0%,100%{opacity:.12;transform:scale(.75)}50%{opacity:.34;transform:scale(1.1)}}
-@keyframes ideas-rays{0%{transform:rotate(0);opacity:.9}50%{opacity:.25}100%{transform:rotate(90deg);opacity:.9}}
 
 /* Acebo junto a la fecha de «Hoy» (en línea, no tapa nada) */
 .ideas-holly{display:inline-block;width:24px;height:16px;margin-left:6px;vertical-align:-3px}
@@ -137,7 +141,8 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
   box-shadow:inset 0 6px 10px rgba(255,255,255,.7)}
 .ideas-scene-hill--front::after,.ideas-scene-hill--back::after{content:"";position:absolute;inset:0;border-radius:inherit;background-image:radial-gradient(rgba(140,175,195,.22) 1px,transparent 1.5px);background-size:9px 7px;opacity:.7}
 .ideas-scene-props{position:absolute;inset:0;z-index:2}
-.ideas-scene-props>svg{position:absolute;filter:drop-shadow(0 3px 3px rgba(0,0,0,.22))}
+.ideas-scene-props>:is(svg,.ideas-tree,.ideas-snowman){position:absolute}
+.ideas-scene-props>svg:not(.ideas-gift){filter:drop-shadow(0 3px 3px rgba(0,0,0,.22))}
 .ideas-scene-props .ideas-tree--a{left:8%;bottom:16px;width:40px;height:56px}
 .ideas-scene-props .ideas-tree--b{left:calc(8% + 30px);bottom:10px;width:30px;height:42px}
 .ideas-scene-props .ideas-tree--c{right:calc(10% + 44px);bottom:22px;width:34px;height:48px}
@@ -148,32 +153,37 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 .ideas-scene-snow{position:absolute;inset:0;z-index:3}
 
 /* ── Escena: piezas nuevas ── */
-.ideas-countdown{display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:4px 11px;border-radius:99px;font-style:normal;font-size:11.5px;font-weight:700;letter-spacing:.01em;
-  color:#fff7dc;border:1px solid rgba(255,255,255,.22);
-  background:linear-gradient(100deg,rgba(255,255,255,.10) 30%,rgba(255,255,255,.28) 50%,rgba(255,255,255,.10) 70%) 0 0/220% 100%,rgba(201,55,47,.55);
-  animation:ideas-shimmer 4.5s ease-in-out infinite}
-.ideas-countdown::before{content:"";width:7px;height:7px;border-radius:50%;background:#ffd166;box-shadow:0 0 6px #ffd166}
-@keyframes ideas-shimmer{0%,100%{background-position:120% 0,0 0}50%{background-position:-20% 0,0 0}}
+.ideas-countdown{position:relative;isolation:isolate;overflow:hidden;display:inline-flex;align-items:center;gap:6px;margin-top:9px;padding:4px 11px;border-radius:99px;font-style:normal;font-size:11.5px;font-weight:700;letter-spacing:.01em;
+  color:#fff7dc;border:1px solid rgba(255,255,255,.22);background:rgba(201,55,47,.55)}
+.ideas-countdown::before{content:"";width:7px;height:7px;border-radius:50%;background:#ffd166;box-shadow:0 0 6px #ffd166;animation:ideas-orns 2s ease-in-out infinite}
+.ideas-countdown::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,transparent 25%,rgba(255,255,255,.32) 50%,transparent 75%);transform:translateX(-110%);animation:ideas-shimmer 5s cubic-bezier(.45,0,.2,1) infinite}
+@keyframes ideas-shimmer{0%,45%{transform:translateX(-110%)}85%,100%{transform:translateX(110%)}}
 .ideas-aurora{position:absolute;inset:0;z-index:0;overflow:hidden}
-.ideas-aurora i{position:absolute;top:-35%;width:72%;height:85%;border-radius:50%;filter:blur(18px);opacity:.3;animation:ideas-aurora 16s ease-in-out infinite alternate;will-change:transform,opacity}
-.ideas-aurora i:first-child{left:-12%;background:radial-gradient(closest-side,#4fe3b0,transparent)}
-.ideas-aurora i:last-child{left:38%;background:radial-gradient(closest-side,#6cb8ff,transparent);animation-duration:21s;animation-delay:-7s}
+.ideas-aurora i{position:absolute;top:-35%;width:72%;height:85%;border-radius:50%;opacity:.3;animation:ideas-aurora 16s ease-in-out infinite alternate}
+.ideas-aurora i:first-child{left:-12%;background:radial-gradient(closest-side,rgba(79,227,176,.9),rgba(79,227,176,.35) 45%,transparent)}
+.ideas-aurora i:last-child{left:38%;background:radial-gradient(closest-side,rgba(108,184,255,.9),rgba(108,184,255,.35) 45%,transparent);animation-duration:21s;animation-delay:-7s}
 @keyframes ideas-aurora{from{transform:translateX(-8%) scaleY(.75);opacity:.18}to{transform:translateX(12%) scaleY(1.1);opacity:.42}}
 .ideas-glint--sky{z-index:0;--g:5px}
 .ideas-shooting{position:absolute;right:14px;top:12px;width:78px;height:2px;z-index:1;transform-origin:100% 50%;transform:rotate(-26deg)}
 .ideas-shooting i{position:absolute;right:0;top:0;width:36px;height:2px;border-radius:2px;background:linear-gradient(90deg,#fff 0,rgba(255,255,255,.55) 35%,transparent);opacity:0;animation:ideas-shoot 9s ease-out 2.5s infinite}
 .ideas-shooting i::before{content:"";position:absolute;left:-3px;top:-3px;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle,#fff 0 30%,transparent 70%)}
 @keyframes ideas-shoot{0%{opacity:0;transform:translateX(0)}2%{opacity:1}10%{opacity:0;transform:translateX(-64px)}100%{opacity:0;transform:translateX(-64px)}}
-.ideas-sleigh{position:absolute;left:0;right:0;top:114px;height:28px;z-index:1;transform:translateX(-100%);animation:ideas-sleigh 24s linear 1s infinite;will-change:transform}
+.ideas-sleigh{position:absolute;left:0;right:0;top:114px;height:28px;z-index:1;transform:translateX(-100%);animation:ideas-sleigh 24s linear 1s infinite}
 .ideas-sleigh-bob{position:absolute;left:0;top:0;width:104px;height:26px;animation:ideas-bob 1.7s ease-in-out infinite alternate}
+.ideas-stardust{position:absolute;left:-26px;top:9px;width:30px;height:12px}
+.ideas-stardust i{position:absolute;width:4px;height:4px;border-radius:50%;background:radial-gradient(circle,#fff 0 30%,rgba(255,232,160,.6) 60%,transparent 72%);animation:ideas-dust 1.2s ease-out infinite}
+.ideas-stardust i:nth-child(1){left:22px;top:2px}.ideas-stardust i:nth-child(2){left:14px;top:6px;animation-delay:-.3s}.ideas-stardust i:nth-child(3){left:7px;top:1px;animation-delay:-.6s}.ideas-stardust i:nth-child(4){left:0;top:5px;animation-delay:-.9s}
+@keyframes ideas-dust{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(-8px,4px) scale(.3)}}
 .ideas-sleigh .ideas-sleigh-art{width:100%;height:100%;filter:drop-shadow(0 0 3px rgba(255,241,200,.55))}
-.ideas-legs{transform-box:fill-box;transform-origin:50% 0;animation:ideas-gallop .45s ease-in-out infinite alternate}
-.ideas-deer:last-of-type .ideas-legs{animation-delay:-.22s}
+.ideas-sleigh-bob>svg{position:absolute;inset:0}
+.ideas-sleigh-legs{animation:ideas-gallop .45s ease-in-out infinite alternate}
+.ideas-sleigh-legs--a{transform-origin:61% 54%}
+.ideas-sleigh-legs--b{transform-origin:84% 54%;animation-delay:-.22s}
 @keyframes ideas-sleigh{0%{transform:translateX(-100%)}55%,100%{transform:translateX(100%)}}
 @keyframes ideas-bob{from{transform:translateY(3px) rotate(-2deg)}to{transform:translateY(-4px) rotate(2deg)}}
-@keyframes ideas-gallop{from{transform:skewX(-14deg)}to{transform:skewX(14deg)}}
+@keyframes ideas-gallop{from{transform:skewX(-12deg)}to{transform:skewX(12deg)}}
 .ideas-scene-props .ideas-cabin{left:56%;bottom:28px;width:44px;height:38px}
-.ideas-cabin-window{animation:ideas-window 3.4s ease-in-out infinite}
+.ideas-cabin-glow{position:absolute;left:calc(56% + 5px);bottom:31px;width:18px;height:15px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,214,122,.9),rgba(255,214,122,0));animation:ideas-window 3.4s ease-in-out infinite}
 @keyframes ideas-window{0%,100%{opacity:1}40%{opacity:.78}46%{opacity:.95}70%{opacity:.84}}
 .ideas-smoke{position:absolute;left:calc(56% + 31px);bottom:63px;width:8px;height:40px}
 .ideas-smoke i{position:absolute;left:0;bottom:0;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle,rgba(235,242,247,.85),rgba(235,242,247,0) 70%);opacity:0;animation:ideas-smoke 4.5s ease-out infinite}
@@ -190,14 +200,12 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 @keyframes ideas-orbit{to{transform:rotate(360deg)}}
 .ideas-side-snow{position:absolute;left:-4px;right:-4px;bottom:0;height:96px;overflow:hidden;-webkit-mask-image:linear-gradient(transparent,#000 30%);mask-image:linear-gradient(transparent,#000 30%)}
 .ideas-side-snow .ideas-flake>b{background:radial-gradient(circle,#a9cde3 0 36%,rgba(169,205,227,.45) 60%,transparent 72%)}
-.ideas-avatar-side>svg{position:relative}
+.ideas-avatar-side>:is(svg,.ideas-tree){position:relative}
 
 /* ── Piezas en línea ── */
 .ideas-bell{display:inline-block;width:14px;height:16px;margin-left:1px;vertical-align:-3px;transform-origin:50% 10%;animation:ideas-bell 3.4s ease-in-out infinite}
 .ideas-bell svg{width:100%;height:100%}
-.ideas-bell-clapper{transform-origin:8px 12px;animation:ideas-clapper 3.4s ease-in-out infinite}
 @keyframes ideas-bell{0%,58%,100%{transform:rotate(0)}64%{transform:rotate(16deg)}70%{transform:rotate(-13deg)}76%{transform:rotate(8deg)}82%{transform:rotate(-4deg)}88%{transform:rotate(1deg)}}
-@keyframes ideas-clapper{0%,58%,100%{transform:translateX(0)}66%{transform:translateX(-1.4px)}72%{transform:translateX(1.4px)}78%{transform:translateX(-.8px)}}
 .ideas-title-flake{display:inline-block;width:13px;height:13px;margin-left:6px;vertical-align:-1px;animation:ideas-spin 10s linear infinite}
 .ideas-note-flake{display:inline-block;width:9px;height:9px;margin:0 6px;vertical-align:-1px;opacity:.75;animation:ideas-spin 16s linear infinite}
 .ideas-note-flake:last-child{animation-direction:reverse}
@@ -208,7 +216,7 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 /* ── Login: paisaje nevado en su propio bloque, debajo de todo ── */
 .ideas-login-scene{position:relative;height:72px;max-width:340px;margin:20px auto 0;overflow:hidden}
 .ideas-login-hill{position:absolute;left:-12%;right:-12%;bottom:-34px;height:62px;border-radius:50%;background:radial-gradient(circle at 50% 18%,#fff,#e4eff5 65%,#c6dbe6);box-shadow:inset 0 4px 8px rgba(255,255,255,.8)}
-.ideas-login-scene>svg{position:absolute;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
+.ideas-login-scene>:is(svg,.ideas-tree,.ideas-snowman){position:absolute}
 .ideas-login-scene .ideas-tree--l1{left:16%;bottom:12px;width:30px;height:42px}
 .ideas-login-scene .ideas-tree--l2{left:calc(16% + 24px);bottom:7px;width:22px;height:31px}
 .ideas-login-scene .ideas-gift--l{left:calc(16% + 50px);bottom:9px;width:14px;height:13px}
@@ -220,12 +228,19 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 /* Fuera de la pantalla: animaciones en pausa */
 .ideas-offscreen,.ideas-offscreen *,.ideas-offscreen ::before,.ideas-offscreen ::after{animation-play-state:paused!important}
 
-.ideas-snowman-head{transform-origin:20px 32px;animation:ideas-snowman-look 13s ease-in-out infinite}
-.ideas-snowman-eyes{transform-box:fill-box;transform-origin:center;animation:ideas-snowman-blink 7s infinite}
-.ideas-snowman-wave{transform-origin:33px 39px;animation:ideas-snowman-wave 14s ease-in-out infinite}
+.ideas-snowman{position:relative;display:block}
+.sm-breathe,.sm-head{position:absolute;inset:0}
+.sm-breathe>svg,.sm-head>svg{position:absolute;inset:0}
+.sm-breathe{transform-origin:50% 98%;animation:ideas-breathe 3.4s ease-in-out infinite}
+.sm-head{transform-origin:50% 57%;animation:ideas-snowman-look 13s ease-in-out infinite}
+.sm-eyes{transform-origin:50% 42%;animation:ideas-snowman-blink 7s infinite}
+.sm-hat{transform-origin:30% 30%;animation:ideas-hat 11s ease-in-out infinite}
+.sm-arm{transform-origin:82.5% 69.6%;animation:ideas-snowman-wave 14s ease-in-out infinite}
+.sm-scarf{transform-origin:60% 61.6%;animation:ideas-scarf 2.2s ease-in-out infinite}
+.sm-breath{transform-origin:72% 48%;opacity:0;animation:ideas-breath 5s ease-out infinite}
 @keyframes ideas-snowman-sway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
 @keyframes ideas-snowman-look{0%,65%,100%{transform:rotate(0)}75%,85%{transform:rotate(-8deg)}}
-@keyframes ideas-snowman-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.1)}}
+@keyframes ideas-snowman-blink{0%,40%,43.5%,46%,49.5%,100%{transform:scaleY(1)}41.5%,47.5%{transform:scaleY(.08)}}
 @keyframes ideas-snowman-wave{0%,80%,100%{transform:rotate(0)}85%,95%{transform:rotate(-35deg)}90%{transform:rotate(10deg)}}
 
 /* ══ 4.1.10 · Tarjetas, títulos, pie nevado y vida ══════════════════════════ */
@@ -242,7 +257,7 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 .ideas-frost::after{content:"";position:absolute;top:0;left:var(--ideas-fx,40%);width:9px;height:9px;margin-left:-4.5px;pointer-events:none;z-index:1;
   background:radial-gradient(circle,#fff 0 22%,#d8efff 50%,rgba(216,239,255,.4) 75%);clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%);
   opacity:0;animation:ideas-frost-glint 7s ease-in-out infinite}
-.ideas-frost--2::after{animation-delay:-2.4s}.ideas-frost--3::after{animation-delay:-4.6s}
+.ideas-frost--2::after,.ideas-frost--3::after{content:none}
 @keyframes ideas-frost-glint{0%,70%,100%{opacity:0;transform:scale(.4) rotate(0)}78%{opacity:1;transform:scale(1) rotate(45deg)}86%{opacity:0;transform:scale(.5) rotate(90deg)}}
 html[data-theme="dark"] .ideas-frost--1{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
 html[data-theme="dark"] .ideas-frost--2{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q156.0 5.2 152.0 4Q146.0 5.6 140.0 4Q134.0 6.0 128.0 4Q127.0 4.4 124.0 4.4C124.0 6.4 120.0 6.4 120.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 112.0 4.4C112.0 7.0 108.0 7.0 108.0 4.4Q111.0 4.2 110.0 4Q106.0 5.2 102.0 4Q101.0 4.4 100.0 4.4C100.0 7.6 96.0 7.6 96.0 4.4Q91.0 4.2 90.0 4Q84.0 5.2 78.0 4Q72.0 5.6 66.0 4Q61.0 6.0 56.0 4Q50.0 6.0 44.0 4Q38.0 5.2 32.0 4Q26.0 5.2 20.0 4Q14.0 5.2 8.0 4Q4.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q156.0 5.2 152.0 4Q146.0 5.6 140.0 4Q134.0 6.0 128.0 4Q127.0 4.4 124.0 4.4C124.0 6.4 120.0 6.4 120.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 112.0 4.4C112.0 7.0 108.0 7.0 108.0 4.4Q111.0 4.2 110.0 4Q106.0 5.2 102.0 4Q101.0 4.4 100.0 4.4C100.0 7.6 96.0 7.6 96.0 4.4Q91.0 4.2 90.0 4Q84.0 5.2 78.0 4Q72.0 5.6 66.0 4Q61.0 6.0 56.0 4Q50.0 6.0 44.0 4Q38.0 5.2 32.0 4Q26.0 5.2 20.0 4Q14.0 5.2 8.0 4Q4.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
@@ -253,7 +268,6 @@ html[data-theme="dark"] .ideas-frost::before{opacity:.92}
 /* Esfera colgante en la esquina superior derecha (libre) de las tarjetas de estadísticas */
 .ideas-tile-orn{position:absolute;top:0;right:12px;width:14px;height:27px;transform-origin:50% 0;animation:ideas-orn-swing 4.2s ease-in-out infinite;z-index:1}
 .ideas-tile-orn svg{width:100%;height:100%}
-.ideas-orn-shine{animation:ideas-chase 3s ease-in-out infinite}
 @keyframes ideas-orn-swing{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
 
 /* Íconos junto a los títulos de sección (en línea, después del texto) */
@@ -275,43 +289,39 @@ html[data-theme="dark"] .ideas-frost::before{opacity:.92}
 .ideas-page-footer .ideas-scene-snow{z-index:0}
 .ideas-page-footer .ideas-flake>b{background:radial-gradient(circle,#9cc3dc 0 36%,rgba(156,195,220,.45) 60%,transparent 72%)}
 .ideas-page-footer .ideas-lamp{position:absolute;left:14%;bottom:10px;width:22px;height:60px;z-index:2}
-.ideas-lamp-bulb{animation:ideas-window 2.6s ease-in-out infinite}
 .ideas-lamp-glow{position:absolute;left:calc(14% - 19px);bottom:30px;width:60px;height:60px;border-radius:50%;z-index:1;
   background:radial-gradient(circle,rgba(255,217,138,.55) 0,rgba(255,217,138,0) 62%);animation:ideas-moon 3.2s ease-in-out infinite}
-.ideas-page-footer>svg{position:absolute;z-index:2;filter:drop-shadow(0 2px 2px rgba(0,0,0,.16))}
+.ideas-page-footer>:is(svg,.ideas-tree){position:absolute;z-index:2}
+.ideas-page-footer>.ideas-lamp{filter:drop-shadow(0 2px 2px rgba(0,0,0,.16))}
 .ideas-page-footer .ideas-tree--f1{right:14%;bottom:12px;width:30px;height:42px}
 .ideas-page-footer .ideas-tree--f2{right:calc(14% + 26px);bottom:8px;width:22px;height:31px}
 .ideas-page-footer .ideas-gift--f{right:calc(14% + 50px);bottom:10px;width:14px;height:13px}
 .ideas-penguin{position:absolute;left:24%;right:44%;bottom:13px;height:24px;z-index:2}
 /* Camina de un lado a otro: el contenedor se desplaza (transform) y la cara se voltea al girar. */
-.ideas-penguin-turn{position:absolute;inset:0;animation:ideas-penguin-walk 16s linear infinite;will-change:transform}
+.ideas-penguin-turn{position:absolute;inset:0;animation:ideas-penguin-walk 16s linear infinite}
 .ideas-penguin-face{position:absolute;left:0;bottom:0;width:20px;height:24px;animation:ideas-penguin-flip 16s steps(1,end) infinite}
 .ideas-penguin-waddle{display:block;width:100%;height:100%;transform-origin:50% 100%;animation:ideas-waddle .5s ease-in-out infinite alternate}
-.ideas-penguin .ideas-penguin-art{width:100%;height:100%}
-.ideas-penguin-wing{transform-box:fill-box;transform-origin:80% 10%;animation:ideas-wing .5s ease-in-out infinite alternate}
+
+.ideas-penguin-waddle>svg{position:absolute;inset:0}
+.ideas-penguin-wing{transform-origin:23% 52%;animation:ideas-wing .5s ease-in-out infinite alternate}
 @keyframes ideas-penguin-walk{0%,100%{transform:translateX(0)}46%,50%{transform:translateX(calc(100% - 20px))}96%{transform:translateX(0)}}
 @keyframes ideas-penguin-flip{0%{transform:scaleX(1)}48%{transform:scaleX(-1)}98%{transform:scaleX(1)}}
 @keyframes ideas-waddle{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
 @keyframes ideas-wing{from{transform:rotate(0)}to{transform:rotate(-14deg)}}
 
 /* Árbol vivo: vaivén con el viento, luces que corren, guirnalda brillante y nieve que cae */
-.ideas-tree-sway{transform-origin:20px 54px;animation:ideas-tree-sway 6s ease-in-out infinite}
+.ideas-tree{position:relative;display:block;transform-origin:50% 97%;animation:ideas-tree-sway 6s cubic-bezier(.37,0,.63,1) var(--td,0s) infinite}
 @keyframes ideas-tree-sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
-.ideas-tree-light{animation:ideas-chase 1.6s ease-in-out infinite}
-.ideas-tinsel{animation:ideas-tinsel 2.4s linear infinite}
-@keyframes ideas-tinsel{to{stroke-dashoffset:-6}}
-.ideas-tree-drop{transform-box:fill-box;transform-origin:center;opacity:0;animation:ideas-drop 9s ease-in infinite}
-@keyframes ideas-drop{0%,80%{opacity:0;transform:translateY(0) scale(1)}83%{opacity:.95}100%{opacity:0;transform:translateY(11px) scale(.6)}}
+.ideas-tree-lights{animation:ideas-tree-lights 1.8s steps(1,end) infinite}
+.ideas-tree-lights--b{animation-delay:-.9s}
+@keyframes ideas-tree-lights{0%{opacity:1}50%{opacity:.25}}
+.ideas-tree-drop{position:absolute;width:6.5%;aspect-ratio:1;margin:-3.25% 0 0 -3.25%;border-radius:50%;background:#fff;box-shadow:0 0 2px rgba(255,255,255,.8);opacity:0;animation:ideas-drop 9s ease-in infinite}
+@keyframes ideas-drop{0%,80%{opacity:0;transform:translateY(0) scale(1)}83%{opacity:.95}100%{opacity:0;transform:translateY(420%) scale(.6)}}
 
 /* Muñeco vivo: respira, se toca el sombrero, ondea la bufanda y echa vaho por el frío */
-.ideas-snowman-body{transform-origin:20px 55px;animation:ideas-breathe 3.4s ease-in-out infinite}
 @keyframes ideas-breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.018) scaleX(.994)}}
-.ideas-snowman-hat{transform-origin:12px 17px;animation:ideas-hat 11s ease-in-out infinite}
 @keyframes ideas-hat{0%,80%,100%{transform:rotate(0) translateY(0)}84%,90%{transform:rotate(-14deg) translateY(-2px)}}
-.ideas-scarf-tail{transform-origin:24px 34.5px;animation:ideas-scarf 2.2s ease-in-out infinite}
 @keyframes ideas-scarf{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(10deg)}}
-.ideas-breath circle{transform-box:fill-box;transform-origin:center;opacity:0;animation:ideas-breath 5s ease-out infinite}
-.ideas-breath circle:last-child{animation-delay:.25s}
 @keyframes ideas-breath{0%,62%{opacity:0;transform:translate(0,0) scale(.4)}68%{opacity:.75}100%{opacity:0;transform:translate(6px,-5px) scale(1.6)}}
 
 /* Regalos que dan un saltito cada tanto */
@@ -343,33 +353,31 @@ html[data-theme="dark"] .ideas-frost::before{opacity:.92}
 
 /* Ráfagas de viento: la nieve se desvía y los árboles se inclinan un poco más */
 html[data-ideas-viento="1"] :is(.ideas-scene-snow,.ideas-hero-snow,.ideas-side-snow){animation:ideas-gust 2.8s ease-in-out}
-html[data-ideas-viento="1"] .ideas-tree-sway{animation:ideas-tree-gust 2.8s ease-in-out}
-html[data-ideas-viento="1"] .ideas-scarf-tail{animation-duration:.6s}
+html[data-ideas-viento="1"] .ideas-tree{animation:ideas-tree-gust 2.8s ease-in-out}
+html[data-ideas-viento="1"] .sm-scarf{animation-duration:.6s}
 @keyframes ideas-gust{0%,100%{transform:translateX(0)}45%{transform:translateX(20px) skewX(-8deg)}}
 @keyframes ideas-tree-gust{0%,100%{transform:rotate(0)}40%{transform:rotate(4deg)}65%{transform:rotate(-1.5deg)}}
 
 /* Programas de luces que se alternan cada 10 s: cadena, destello, alterno y respiración */
-html[data-ideas-luces="destello"] .ideas-bulb{animation-name:ideas-sparkle,ideas-swing;animation-duration:var(--sp,3s),var(--sp,3s);animation-delay:var(--sd,0s),var(--sd,0s)}
-html[data-ideas-luces="destello"] .ideas-bulb::after{animation-name:ideas-halo;animation-duration:var(--sp,3s);animation-delay:var(--sd,0s)}
-html[data-ideas-luces="alterno"] .ideas-bulb{animation-name:ideas-alt,ideas-swing;animation-duration:1.4s,var(--sp,3s);animation-delay:0s,var(--sd,0s);animation-timing-function:steps(1,end),ease-in-out}
-html[data-ideas-luces="alterno"] .ideas-bulb:nth-of-type(2n){animation-delay:-.7s,var(--sd,0s)}
-html[data-ideas-luces="alterno"] .ideas-bulb::after{animation-name:ideas-alt-halo;animation-duration:1.4s;animation-delay:0s;animation-timing-function:steps(1,end)}
-html[data-ideas-luces="alterno"] .ideas-bulb:nth-of-type(2n)::after{animation-delay:-.7s}
-html[data-ideas-luces="respira"] .ideas-bulb{animation-name:ideas-chase,ideas-swing;animation-duration:3.2s,var(--sp,3s);animation-delay:0s,var(--sd,0s)}
-html[data-ideas-luces="respira"] .ideas-bulb::after{animation-duration:3.2s;animation-delay:0s}
+html[data-ideas-luces="destello"] .ideas-bulbs{animation-name:ideas-sparkle,ideas-jiggle;animation-duration:1.7s,3.1s}
+html[data-ideas-luces="destello"] .ideas-bulbs--1{animation-duration:2.3s,3.5s}html[data-ideas-luces="destello"] .ideas-bulbs--2{animation-duration:1.3s,2.8s}html[data-ideas-luces="destello"] .ideas-bulbs--3{animation-duration:2.9s,3.8s}
+html[data-ideas-luces="alterno"] .ideas-bulbs{animation-name:ideas-alt,ideas-jiggle;animation-duration:1.4s,3.1s;animation-timing-function:steps(1,end),cubic-bezier(.37,0,.63,1)}
+html[data-ideas-luces="alterno"] :is(.ideas-bulbs--0,.ideas-bulbs--2){animation-delay:0s,-.8s}html[data-ideas-luces="alterno"] :is(.ideas-bulbs--1,.ideas-bulbs--3){animation-delay:-.7s,-1.9s}
+html[data-ideas-luces="respira"] .ideas-bulbs{animation-name:ideas-chase,ideas-jiggle;animation-duration:3.2s,3.1s;animation-delay:0s,0s}
 @keyframes ideas-sparkle{0%,100%{opacity:.5}8%{opacity:1}16%{opacity:.6}50%{opacity:.85}}
 @keyframes ideas-alt{0%{opacity:1}50%{opacity:.3}}
-@keyframes ideas-alt-halo{0%{opacity:.6}50%{opacity:0}}
 
 /* Tocar la escena: celebración */
 .ideas-xmas-scene{pointer-events:auto!important;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .ideas-burst .ideas-flake{animation-duration:2.4s!important;animation-delay:0s!important;animation-iteration-count:1}
-.ideas-celebrate .ideas-tree-sway{animation:ideas-shake .45s ease-in-out 4}
+.ideas-celebrate .ideas-tree{animation:ideas-shake .45s ease-in-out 4}
 .ideas-celebrate .ideas-gift{animation:ideas-hop-now .6s ease-in-out 3}
-.ideas-celebrate .ideas-snowman-wave{animation:ideas-wave-now .5s ease-in-out 4}
-.ideas-celebrate .ideas-snowman-hat{animation:ideas-hat-now 1.2s ease-in-out 1}
-.ideas-celebrate .ideas-bulb{animation-name:ideas-alt,ideas-swing!important;animation-duration:.28s,var(--sp,3s)!important;animation-timing-function:steps(1,end),ease-in-out!important}
-.ideas-celebrate .ideas-countdown{animation:ideas-pop .5s ease-out 1,ideas-shimmer 1s ease-in-out 2}
+.ideas-celebrate .sm-arm{animation:ideas-wave-now .5s ease-in-out 4}
+.ideas-celebrate .sm-hat{animation:ideas-hat-now 1.2s ease-in-out 1}
+.ideas-celebrate .ideas-bulbs{animation-name:ideas-alt,ideas-jiggle!important;animation-duration:.28s,1s!important;animation-timing-function:steps(1,end),ease-in-out!important}
+.ideas-celebrate :is(.ideas-bulbs--1,.ideas-bulbs--3){animation-delay:-.14s,0s!important}
+.ideas-celebrate .ideas-countdown{animation:ideas-pop .5s ease-out 1}
+.ideas-celebrate .ideas-countdown::after{animation-duration:.9s}
 @keyframes ideas-shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
 @keyframes ideas-hop-now{0%,100%{transform:translateY(0)}45%{transform:translateY(-6px) rotate(-6deg)}}
 @keyframes ideas-wave-now{0%,100%{transform:rotate(0)}50%{transform:rotate(-38deg)}}
@@ -380,6 +388,10 @@ html[data-ideas-luces="respira"] .ideas-bulb::after{animation-duration:3.2s;anim
 html.ideas-christmas-still :is(.ideas-frost,.ideas-tile-orn)::after,html.ideas-christmas-still .ideas-frost::after{animation:none!important;opacity:0}
 html.ideas-christmas-still :is(.ideas-penguin-turn,.ideas-penguin-face){animation:none!important}
 @media (prefers-reduced-motion:reduce){.ideas-frost::after{animation:none!important;opacity:0}:is(.ideas-penguin-turn,.ideas-penguin-face){animation:none!important}}
+
+/* Aparición suave al encender el Modo Navidad (solo contenedores sin animación propia) */
+html[data-ideas-entrada] :is(.ideas-xmas-scene,.ideas-avatar-decor,.ideas-hero-decor,.ideas-page-footer,.ideas-garland,.ideas-login-scene){animation:ideas-appear .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ideas-appear{from{opacity:0;transform:translateY(6px) scale(.985)}}
 
 /* Tema oscuro: tonos un poco más suaves para no deslumbrar */
 html[data-theme="dark"] .ideas-avatar-ring>svg path{stroke:#7fb79a}
