@@ -98,7 +98,6 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 .ideas-avatar-side--left{right:calc(100% + 26px)}
 .ideas-avatar-side--right{left:calc(100% + 26px)}
 .ideas-avatar-side .ideas-tree{width:38px;height:53px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
-.ideas-avatar-side .ideas-tree--flip{transform:scaleX(-1)}
 .ideas-avatar-side .ideas-gift--small{width:17px;height:15px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.18))}
 .ideas-avatar-decor--narrow .ideas-avatar-side{display:none}
 @keyframes ideas-ring-breathe{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
@@ -228,6 +227,159 @@ html body [data-ideas-decor] svg:not([class]){width:100%;height:100%}
 @keyframes ideas-snowman-look{0%,65%,100%{transform:rotate(0)}75%,85%{transform:rotate(-8deg)}}
 @keyframes ideas-snowman-blink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.1)}}
 @keyframes ideas-snowman-wave{0%,80%,100%{transform:rotate(0)}85%,95%{transform:rotate(-35deg)}90%{transform:rotate(10deg)}}
+
+/* ══ 4.1.10 · Tarjetas, títulos, pie nevado y vida ══════════════════════════ */
+
+/* Escarcha sobre el borde superior de cada tarjeta: ocupa solo el relleno superior (≤ 8 px)
+   y evita la columna de íconos de la izquierda. */
+.ideas-frost{position:relative}
+.ideas-frost::before{content:"";position:absolute;left:0;right:0;top:0;height:10px;border-radius:inherit;border-bottom-left-radius:0;border-bottom-right-radius:0;
+  background:var(--ideas-frost-art) repeat-x 0 0/160px 10px;pointer-events:none;z-index:1;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 18px),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 18px),transparent)}
+.ideas-frost--1{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%237fa9c2' opacity='.55'/%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' fill='%23e3f1fa'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
+.ideas-frost--2{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q156.0 5.2 152.0 4Q146.0 5.6 140.0 4Q134.0 6.0 128.0 4Q127.0 4.4 124.0 4.4C124.0 6.4 120.0 6.4 120.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 112.0 4.4C112.0 7.0 108.0 7.0 108.0 4.4Q111.0 4.2 110.0 4Q106.0 5.2 102.0 4Q101.0 4.4 100.0 4.4C100.0 7.6 96.0 7.6 96.0 4.4Q91.0 4.2 90.0 4Q84.0 5.2 78.0 4Q72.0 5.6 66.0 4Q61.0 6.0 56.0 4Q50.0 6.0 44.0 4Q38.0 5.2 32.0 4Q26.0 5.2 20.0 4Q14.0 5.2 8.0 4Q4.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%237fa9c2' opacity='.55'/%3E%3Cpath d='M0 0H160V4Q156.0 5.2 152.0 4Q146.0 5.6 140.0 4Q134.0 6.0 128.0 4Q127.0 4.4 124.0 4.4C124.0 6.4 120.0 6.4 120.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 112.0 4.4C112.0 7.0 108.0 7.0 108.0 4.4Q111.0 4.2 110.0 4Q106.0 5.2 102.0 4Q101.0 4.4 100.0 4.4C100.0 7.6 96.0 7.6 96.0 4.4Q91.0 4.2 90.0 4Q84.0 5.2 78.0 4Q72.0 5.6 66.0 4Q61.0 6.0 56.0 4Q50.0 6.0 44.0 4Q38.0 5.2 32.0 4Q26.0 5.2 20.0 4Q14.0 5.2 8.0 4Q4.0 5.2 0.0 4Z' fill='%23e3f1fa'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
+.ideas-frost--3{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q154.0 5.6 148.0 4Q144.0 6.0 140.0 4Q135.0 5.6 130.0 4Q129.0 4.4 130.0 4.4C130.0 6.4 126.0 6.4 126.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q113.0 4.2 112.0 4Q107.0 6.0 102.0 4Q98.0 5.6 94.0 4Q90.0 5.6 86.0 4Q85.0 4.4 82.0 4.4C82.0 7.6 78.0 7.6 78.0 4.4Q77.0 4.2 76.0 4Q70.0 5.6 64.0 4Q58.0 5.2 52.0 4Q47.0 5.2 42.0 4Q38.0 5.6 34.0 4Q33.0 4.4 28.0 4.4C28.0 7.6 24.0 7.6 24.0 4.4Q25.0 4.2 24.0 4Q18.0 6.0 12.0 4Q6.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%237fa9c2' opacity='.55'/%3E%3Cpath d='M0 0H160V4Q154.0 5.6 148.0 4Q144.0 6.0 140.0 4Q135.0 5.6 130.0 4Q129.0 4.4 130.0 4.4C130.0 6.4 126.0 6.4 126.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q113.0 4.2 112.0 4Q107.0 6.0 102.0 4Q98.0 5.6 94.0 4Q90.0 5.6 86.0 4Q85.0 4.4 82.0 4.4C82.0 7.6 78.0 7.6 78.0 4.4Q77.0 4.2 76.0 4Q70.0 5.6 64.0 4Q58.0 5.2 52.0 4Q47.0 5.2 42.0 4Q38.0 5.6 34.0 4Q33.0 4.4 28.0 4.4C28.0 7.6 24.0 7.6 24.0 4.4Q25.0 4.2 24.0 4Q18.0 6.0 12.0 4Q6.0 5.2 0.0 4Z' fill='%23e3f1fa'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
+.ideas-frost::after{content:"";position:absolute;top:0;left:var(--ideas-fx,40%);width:9px;height:9px;margin-left:-4.5px;pointer-events:none;z-index:1;
+  background:radial-gradient(circle,#fff 0 22%,#d8efff 50%,rgba(216,239,255,.4) 75%);clip-path:polygon(50% 0,58% 42%,100% 50%,58% 58%,50% 100%,42% 58%,0 50%,42% 42%);
+  opacity:0;animation:ideas-frost-glint 7s ease-in-out infinite}
+.ideas-frost--2::after{animation-delay:-2.4s}.ideas-frost--3::after{animation-delay:-4.6s}
+@keyframes ideas-frost-glint{0%,70%,100%{opacity:0;transform:scale(.4) rotate(0)}78%{opacity:1;transform:scale(1) rotate(45deg)}86%{opacity:0;transform:scale(.5) rotate(90deg)}}
+html[data-theme="dark"] .ideas-frost--1{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
+html[data-theme="dark"] .ideas-frost--2{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q156.0 5.2 152.0 4Q146.0 5.6 140.0 4Q134.0 6.0 128.0 4Q127.0 4.4 124.0 4.4C124.0 6.4 120.0 6.4 120.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 112.0 4.4C112.0 7.0 108.0 7.0 108.0 4.4Q111.0 4.2 110.0 4Q106.0 5.2 102.0 4Q101.0 4.4 100.0 4.4C100.0 7.6 96.0 7.6 96.0 4.4Q91.0 4.2 90.0 4Q84.0 5.2 78.0 4Q72.0 5.6 66.0 4Q61.0 6.0 56.0 4Q50.0 6.0 44.0 4Q38.0 5.2 32.0 4Q26.0 5.2 20.0 4Q14.0 5.2 8.0 4Q4.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q156.0 5.2 152.0 4Q146.0 5.6 140.0 4Q134.0 6.0 128.0 4Q127.0 4.4 124.0 4.4C124.0 6.4 120.0 6.4 120.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 112.0 4.4C112.0 7.0 108.0 7.0 108.0 4.4Q111.0 4.2 110.0 4Q106.0 5.2 102.0 4Q101.0 4.4 100.0 4.4C100.0 7.6 96.0 7.6 96.0 4.4Q91.0 4.2 90.0 4Q84.0 5.2 78.0 4Q72.0 5.6 66.0 4Q61.0 6.0 56.0 4Q50.0 6.0 44.0 4Q38.0 5.2 32.0 4Q26.0 5.2 20.0 4Q14.0 5.2 8.0 4Q4.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
+html[data-theme="dark"] .ideas-frost--3{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q154.0 5.6 148.0 4Q144.0 6.0 140.0 4Q135.0 5.6 130.0 4Q129.0 4.4 130.0 4.4C130.0 6.4 126.0 6.4 126.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q113.0 4.2 112.0 4Q107.0 6.0 102.0 4Q98.0 5.6 94.0 4Q90.0 5.6 86.0 4Q85.0 4.4 82.0 4.4C82.0 7.6 78.0 7.6 78.0 4.4Q77.0 4.2 76.0 4Q70.0 5.6 64.0 4Q58.0 5.2 52.0 4Q47.0 5.2 42.0 4Q38.0 5.6 34.0 4Q33.0 4.4 28.0 4.4C28.0 7.6 24.0 7.6 24.0 4.4Q25.0 4.2 24.0 4Q18.0 6.0 12.0 4Q6.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q154.0 5.6 148.0 4Q144.0 6.0 140.0 4Q135.0 5.6 130.0 4Q129.0 4.4 130.0 4.4C130.0 6.4 126.0 6.4 126.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q113.0 4.2 112.0 4Q107.0 6.0 102.0 4Q98.0 5.6 94.0 4Q90.0 5.6 86.0 4Q85.0 4.4 82.0 4.4C82.0 7.6 78.0 7.6 78.0 4.4Q77.0 4.2 76.0 4Q70.0 5.6 64.0 4Q58.0 5.2 52.0 4Q47.0 5.2 42.0 4Q38.0 5.6 34.0 4Q33.0 4.4 28.0 4.4C28.0 7.6 24.0 7.6 24.0 4.4Q25.0 4.2 24.0 4Q18.0 6.0 12.0 4Q6.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]) .ideas-frost--1{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q155.0 6.0 150.0 4Q145.0 6.0 140.0 4Q134.0 5.2 128.0 4Q127.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q117.0 4.2 116.0 4Q111.0 5.6 106.0 4Q100.0 5.2 94.0 4Q90.0 6.0 86.0 4Q81.0 6.0 76.0 4Q70.0 5.6 64.0 4Q63.0 4.4 58.0 4.4C58.0 7.6 54.0 7.6 54.0 4.4Q55.0 4.2 54.0 4Q50.0 5.2 46.0 4Q45.0 4.4 40.0 4.4C40.0 6.4 36.0 6.4 36.0 4.4Q35.0 4.2 34.0 4Q28.0 5.6 22.0 4Q16.0 5.2 10.0 4Q5.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}html:not([data-theme="light"]) .ideas-frost--2{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q156.0 5.2 152.0 4Q146.0 5.6 140.0 4Q134.0 6.0 128.0 4Q127.0 4.4 124.0 4.4C124.0 6.4 120.0 6.4 120.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 112.0 4.4C112.0 7.0 108.0 7.0 108.0 4.4Q111.0 4.2 110.0 4Q106.0 5.2 102.0 4Q101.0 4.4 100.0 4.4C100.0 7.6 96.0 7.6 96.0 4.4Q91.0 4.2 90.0 4Q84.0 5.2 78.0 4Q72.0 5.6 66.0 4Q61.0 6.0 56.0 4Q50.0 6.0 44.0 4Q38.0 5.2 32.0 4Q26.0 5.2 20.0 4Q14.0 5.2 8.0 4Q4.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q156.0 5.2 152.0 4Q146.0 5.6 140.0 4Q134.0 6.0 128.0 4Q127.0 4.4 124.0 4.4C124.0 6.4 120.0 6.4 120.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 112.0 4.4C112.0 7.0 108.0 7.0 108.0 4.4Q111.0 4.2 110.0 4Q106.0 5.2 102.0 4Q101.0 4.4 100.0 4.4C100.0 7.6 96.0 7.6 96.0 4.4Q91.0 4.2 90.0 4Q84.0 5.2 78.0 4Q72.0 5.6 66.0 4Q61.0 6.0 56.0 4Q50.0 6.0 44.0 4Q38.0 5.2 32.0 4Q26.0 5.2 20.0 4Q14.0 5.2 8.0 4Q4.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}html:not([data-theme="light"]) .ideas-frost--3{--ideas-frost-art:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='10' viewBox='0 0 160 10'%3E%3Cpath d='M0 0H160V4Q154.0 5.6 148.0 4Q144.0 6.0 140.0 4Q135.0 5.6 130.0 4Q129.0 4.4 130.0 4.4C130.0 6.4 126.0 6.4 126.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q113.0 4.2 112.0 4Q107.0 6.0 102.0 4Q98.0 5.6 94.0 4Q90.0 5.6 86.0 4Q85.0 4.4 82.0 4.4C82.0 7.6 78.0 7.6 78.0 4.4Q77.0 4.2 76.0 4Q70.0 5.6 64.0 4Q58.0 5.2 52.0 4Q47.0 5.2 42.0 4Q38.0 5.6 34.0 4Q33.0 4.4 28.0 4.4C28.0 7.6 24.0 7.6 24.0 4.4Q25.0 4.2 24.0 4Q18.0 6.0 12.0 4Q6.0 5.2 0.0 4Z' transform='translate(0 1)' fill='%2390b4c8' opacity='.35'/%3E%3Cpath d='M0 0H160V4Q154.0 5.6 148.0 4Q144.0 6.0 140.0 4Q135.0 5.6 130.0 4Q129.0 4.4 130.0 4.4C130.0 6.4 126.0 6.4 126.0 4.4Q121.0 4.2 120.0 4Q119.0 4.4 118.0 4.4C118.0 6.4 114.0 6.4 114.0 4.4Q113.0 4.2 112.0 4Q107.0 6.0 102.0 4Q98.0 5.6 94.0 4Q90.0 5.6 86.0 4Q85.0 4.4 82.0 4.4C82.0 7.6 78.0 7.6 78.0 4.4Q77.0 4.2 76.0 4Q70.0 5.6 64.0 4Q58.0 5.2 52.0 4Q47.0 5.2 42.0 4Q38.0 5.6 34.0 4Q33.0 4.4 28.0 4.4C28.0 7.6 24.0 7.6 24.0 4.4Q25.0 4.2 24.0 4Q18.0 6.0 12.0 4Q6.0 5.2 0.0 4Z' fill='%23ffffff'/%3E%3Cpath d='M0 1.3H160' stroke='%23ffffff' stroke-width='.9' opacity='.95'/%3E%3C/svg%3E")}}
+html[data-theme="dark"] .ideas-frost::before{opacity:.92}
+
+/* Esfera colgante en la esquina superior derecha (libre) de las tarjetas de estadísticas */
+.ideas-tile-orn{position:absolute;top:0;right:12px;width:14px;height:27px;transform-origin:50% 0;animation:ideas-orn-swing 4.2s ease-in-out infinite;z-index:1}
+.ideas-tile-orn svg{width:100%;height:100%}
+.ideas-orn-shine{animation:ideas-chase 3s ease-in-out infinite}
+@keyframes ideas-orn-swing{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+
+/* Íconos junto a los títulos de sección (en línea, después del texto) */
+.ideas-head-icon{display:inline-block;width:14px;height:15px;margin-left:7px;vertical-align:-2px}
+.ideas-head-icon svg{width:100%;height:100%}
+.ideas-head-icon--ball,.ideas-head-icon--bell{transform-origin:50% 0;animation:ideas-orn-swing 3.6s ease-in-out infinite}
+.ideas-head-icon--bell{animation-name:ideas-bell;animation-duration:5s}
+.ideas-head-icon--star{animation:ideas-star 3.2s ease-in-out infinite}
+.ideas-head-icon--cane{transform-origin:50% 100%;animation:ideas-cane-tilt 4.4s ease-in-out infinite}
+.ideas-head-icon--gift{transform-origin:50% 100%;animation:ideas-hop 3.8s ease-in-out infinite}
+.ideas-head-icon--flake{width:13px;height:13px;animation:ideas-spin 9s linear infinite}
+@keyframes ideas-cane-tilt{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+
+/* Pie nevado: sección propia al final de las pantallas sin escena */
+.ideas-page-footer{position:relative;height:76px;margin:14px 0 4px;overflow:hidden;border-radius:0 0 22px 22px}
+.ideas-footer-drift{position:absolute;left:-8%;right:-8%;bottom:-36px;height:66px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle at 30% 18%,#fff,#e6f0f6 60%,#c9dce7);box-shadow:inset 0 5px 8px rgba(255,255,255,.85)}
+.ideas-footer-drift::after{content:"";position:absolute;inset:0;border-radius:inherit;background-image:radial-gradient(rgba(140,175,195,.22) 1px,transparent 1.5px);background-size:9px 7px}
+.ideas-page-footer .ideas-scene-snow{z-index:0}
+.ideas-page-footer .ideas-flake>b{background:radial-gradient(circle,#9cc3dc 0 36%,rgba(156,195,220,.45) 60%,transparent 72%)}
+.ideas-page-footer .ideas-lamp{position:absolute;left:14%;bottom:10px;width:22px;height:60px;z-index:2}
+.ideas-lamp-bulb{animation:ideas-window 2.6s ease-in-out infinite}
+.ideas-lamp-glow{position:absolute;left:calc(14% - 19px);bottom:30px;width:60px;height:60px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(255,217,138,.55) 0,rgba(255,217,138,0) 62%);animation:ideas-moon 3.2s ease-in-out infinite}
+.ideas-page-footer>svg{position:absolute;z-index:2;filter:drop-shadow(0 2px 2px rgba(0,0,0,.16))}
+.ideas-page-footer .ideas-tree--f1{right:14%;bottom:12px;width:30px;height:42px}
+.ideas-page-footer .ideas-tree--f2{right:calc(14% + 26px);bottom:8px;width:22px;height:31px}
+.ideas-page-footer .ideas-gift--f{right:calc(14% + 50px);bottom:10px;width:14px;height:13px}
+.ideas-penguin{position:absolute;left:24%;right:44%;bottom:13px;height:24px;z-index:2}
+/* Camina de un lado a otro: el contenedor se desplaza (transform) y la cara se voltea al girar. */
+.ideas-penguin-turn{position:absolute;inset:0;animation:ideas-penguin-walk 16s linear infinite;will-change:transform}
+.ideas-penguin-face{position:absolute;left:0;bottom:0;width:20px;height:24px;animation:ideas-penguin-flip 16s steps(1,end) infinite}
+.ideas-penguin-waddle{display:block;width:100%;height:100%;transform-origin:50% 100%;animation:ideas-waddle .5s ease-in-out infinite alternate}
+.ideas-penguin .ideas-penguin-art{width:100%;height:100%}
+.ideas-penguin-wing{transform-box:fill-box;transform-origin:80% 10%;animation:ideas-wing .5s ease-in-out infinite alternate}
+@keyframes ideas-penguin-walk{0%,100%{transform:translateX(0)}46%,50%{transform:translateX(calc(100% - 20px))}96%{transform:translateX(0)}}
+@keyframes ideas-penguin-flip{0%{transform:scaleX(1)}48%{transform:scaleX(-1)}98%{transform:scaleX(1)}}
+@keyframes ideas-waddle{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+@keyframes ideas-wing{from{transform:rotate(0)}to{transform:rotate(-14deg)}}
+
+/* Árbol vivo: vaivén con el viento, luces que corren, guirnalda brillante y nieve que cae */
+.ideas-tree-sway{transform-origin:20px 54px;animation:ideas-tree-sway 6s ease-in-out infinite}
+@keyframes ideas-tree-sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+.ideas-tree-light{animation:ideas-chase 1.6s ease-in-out infinite}
+.ideas-tinsel{animation:ideas-tinsel 2.4s linear infinite}
+@keyframes ideas-tinsel{to{stroke-dashoffset:-6}}
+.ideas-tree-drop{transform-box:fill-box;transform-origin:center;opacity:0;animation:ideas-drop 9s ease-in infinite}
+@keyframes ideas-drop{0%,80%{opacity:0;transform:translateY(0) scale(1)}83%{opacity:.95}100%{opacity:0;transform:translateY(11px) scale(.6)}}
+
+/* Muñeco vivo: respira, se toca el sombrero, ondea la bufanda y echa vaho por el frío */
+.ideas-snowman-body{transform-origin:20px 55px;animation:ideas-breathe 3.4s ease-in-out infinite}
+@keyframes ideas-breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.018) scaleX(.994)}}
+.ideas-snowman-hat{transform-origin:12px 17px;animation:ideas-hat 11s ease-in-out infinite}
+@keyframes ideas-hat{0%,80%,100%{transform:rotate(0) translateY(0)}84%,90%{transform:rotate(-14deg) translateY(-2px)}}
+.ideas-scarf-tail{transform-origin:24px 34.5px;animation:ideas-scarf 2.2s ease-in-out infinite}
+@keyframes ideas-scarf{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(10deg)}}
+.ideas-breath circle{transform-box:fill-box;transform-origin:center;opacity:0;animation:ideas-breath 5s ease-out infinite}
+.ideas-breath circle:last-child{animation-delay:.25s}
+@keyframes ideas-breath{0%,62%{opacity:0;transform:translate(0,0) scale(.4)}68%{opacity:.75}100%{opacity:0;transform:translate(6px,-5px) scale(1.6)}}
+
+/* Regalos que dan un saltito cada tanto */
+.ideas-gift{transform-origin:50% 100%;animation:ideas-hop 7s ease-in-out var(--hop,0s) infinite}
+@keyframes ideas-hop{0%,84%,100%{transform:translateY(0) scale(1,1)}87%{transform:translateY(0) scale(1.08,.9)}91%{transform:translateY(-4px) scale(.95,1.06)}95%{transform:translateY(0) scale(1.05,.94)}}
+
+/* Escena: nubes y cielo según la hora de Lima */
+.ideas-clouds{position:absolute;inset:0;z-index:0;overflow:hidden}
+.ideas-clouds>span{position:absolute;left:0;right:0;height:22px;transform:translateX(-100%);animation:ideas-drift 70s linear infinite}
+.ideas-clouds>span:nth-child(1){top:104px;animation-delay:-12s}
+.ideas-clouds>span:nth-child(2){top:2px;animation-duration:95s;animation-delay:-60s}
+.ideas-clouds>span:nth-child(3){top:122px;animation-duration:82s;animation-delay:-35s}
+.ideas-clouds i{position:absolute;left:0;top:0;width:64px;height:22px;
+  background:radial-gradient(circle at 30% 70%,var(--cloud) 0 9px,transparent 9.5px),radial-gradient(circle at 52% 45%,var(--cloud) 0 11px,transparent 11.5px),radial-gradient(circle at 74% 70%,var(--cloud) 0 8px,transparent 8.5px),linear-gradient(var(--cloud),var(--cloud)) 12px 15px/42px 7px no-repeat;--cloud:rgba(210,225,236,.16)}
+.ideas-clouds>span:nth-child(2) i{transform:scale(.7)}
+@keyframes ideas-drift{to{transform:translateX(100%)}}
+.ideas-xmas-scene.ideas-scene--dia{background:radial-gradient(120% 90% at 80% 0%,#8fd0f5 0%,transparent 60%),linear-gradient(180deg,#3d8fd0 0%,#66b0e3 55%,#9fd3ef 100%)}
+.ideas-scene--dia .ideas-clouds i{--cloud:rgba(255,255,255,.88)}
+/* Nubes en carriles libres (sobre la guirnalda y bajo la cuenta regresiva) y texto con más contraste de día */
+.ideas-scene--dia .ideas-scene-text,.ideas-scene--tarde .ideas-scene-text{text-shadow:0 1px 3px rgba(18,52,86,.6),0 0 12px rgba(18,52,86,.35)}
+.ideas-scene--dia :is(.ideas-aurora,.ideas-glint--sky){display:none}
+.ideas-scene--dia .ideas-scene-moon,.ideas-scene--tarde .ideas-scene-moon{background:radial-gradient(circle at 42% 40%,#fffbe0 0 30%,#ffd45a 62%,#f6a623 100%);box-shadow:0 0 18px 8px rgba(255,205,90,.4)}
+.ideas-scene--dia .ideas-scene-moon::after,.ideas-scene--tarde .ideas-scene-moon::after{left:-9px;top:-9px;width:44px;height:44px;border-radius:50%;box-shadow:none;
+  background:repeating-conic-gradient(rgba(255,214,102,.55) 0 8deg,transparent 8deg 30deg);-webkit-mask-image:radial-gradient(circle,transparent 0 13px,#000 14px 21px,transparent 22px);mask-image:radial-gradient(circle,transparent 0 13px,#000 14px 21px,transparent 22px);animation:ideas-spin 24s linear infinite}
+.ideas-xmas-scene.ideas-scene--tarde{background:radial-gradient(120% 90% at 85% 15%,#ffb36b 0%,transparent 55%),linear-gradient(180deg,#2c4a7a 0%,#7c5a86 50%,#e08a6a 100%)}
+.ideas-scene--tarde .ideas-clouds i{--cloud:rgba(255,214,190,.35)}
+.ideas-scene--tarde .ideas-aurora{display:none}
+.ideas-scene--tarde .ideas-scene-moon{top:46px}
+
+/* Ráfagas de viento: la nieve se desvía y los árboles se inclinan un poco más */
+html[data-ideas-viento="1"] :is(.ideas-scene-snow,.ideas-hero-snow,.ideas-side-snow){animation:ideas-gust 2.8s ease-in-out}
+html[data-ideas-viento="1"] .ideas-tree-sway{animation:ideas-tree-gust 2.8s ease-in-out}
+html[data-ideas-viento="1"] .ideas-scarf-tail{animation-duration:.6s}
+@keyframes ideas-gust{0%,100%{transform:translateX(0)}45%{transform:translateX(20px) skewX(-8deg)}}
+@keyframes ideas-tree-gust{0%,100%{transform:rotate(0)}40%{transform:rotate(4deg)}65%{transform:rotate(-1.5deg)}}
+
+/* Programas de luces que se alternan cada 10 s: cadena, destello, alterno y respiración */
+html[data-ideas-luces="destello"] .ideas-bulb{animation-name:ideas-sparkle,ideas-swing;animation-duration:var(--sp,3s),var(--sp,3s);animation-delay:var(--sd,0s),var(--sd,0s)}
+html[data-ideas-luces="destello"] .ideas-bulb::after{animation-name:ideas-halo;animation-duration:var(--sp,3s);animation-delay:var(--sd,0s)}
+html[data-ideas-luces="alterno"] .ideas-bulb{animation-name:ideas-alt,ideas-swing;animation-duration:1.4s,var(--sp,3s);animation-delay:0s,var(--sd,0s);animation-timing-function:steps(1,end),ease-in-out}
+html[data-ideas-luces="alterno"] .ideas-bulb:nth-of-type(2n){animation-delay:-.7s,var(--sd,0s)}
+html[data-ideas-luces="alterno"] .ideas-bulb::after{animation-name:ideas-alt-halo;animation-duration:1.4s;animation-delay:0s;animation-timing-function:steps(1,end)}
+html[data-ideas-luces="alterno"] .ideas-bulb:nth-of-type(2n)::after{animation-delay:-.7s}
+html[data-ideas-luces="respira"] .ideas-bulb{animation-name:ideas-chase,ideas-swing;animation-duration:3.2s,var(--sp,3s);animation-delay:0s,var(--sd,0s)}
+html[data-ideas-luces="respira"] .ideas-bulb::after{animation-duration:3.2s;animation-delay:0s}
+@keyframes ideas-sparkle{0%,100%{opacity:.5}8%{opacity:1}16%{opacity:.6}50%{opacity:.85}}
+@keyframes ideas-alt{0%{opacity:1}50%{opacity:.3}}
+@keyframes ideas-alt-halo{0%{opacity:.6}50%{opacity:0}}
+
+/* Tocar la escena: celebración */
+.ideas-xmas-scene{pointer-events:auto!important;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ideas-burst .ideas-flake{animation-duration:2.4s!important;animation-delay:0s!important;animation-iteration-count:1}
+.ideas-celebrate .ideas-tree-sway{animation:ideas-shake .45s ease-in-out 4}
+.ideas-celebrate .ideas-gift{animation:ideas-hop-now .6s ease-in-out 3}
+.ideas-celebrate .ideas-snowman-wave{animation:ideas-wave-now .5s ease-in-out 4}
+.ideas-celebrate .ideas-snowman-hat{animation:ideas-hat-now 1.2s ease-in-out 1}
+.ideas-celebrate .ideas-bulb{animation-name:ideas-alt,ideas-swing!important;animation-duration:.28s,var(--sp,3s)!important;animation-timing-function:steps(1,end),ease-in-out!important}
+.ideas-celebrate .ideas-countdown{animation:ideas-pop .5s ease-out 1,ideas-shimmer 1s ease-in-out 2}
+@keyframes ideas-shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-5deg)}75%{transform:rotate(5deg)}}
+@keyframes ideas-hop-now{0%,100%{transform:translateY(0)}45%{transform:translateY(-6px) rotate(-6deg)}}
+@keyframes ideas-wave-now{0%,100%{transform:rotate(0)}50%{transform:rotate(-38deg)}}
+@keyframes ideas-hat-now{0%,100%{transform:rotate(0) translateY(0)}30%,70%{transform:rotate(-16deg) translateY(-3px)}}
+@keyframes ideas-pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+/* Movimiento reducido: todo quieto, incluidos los programas de luces y el viento */
+html.ideas-christmas-still :is(.ideas-frost,.ideas-tile-orn)::after,html.ideas-christmas-still .ideas-frost::after{animation:none!important;opacity:0}
+html.ideas-christmas-still :is(.ideas-penguin-turn,.ideas-penguin-face){animation:none!important}
+@media (prefers-reduced-motion:reduce){.ideas-frost::after{animation:none!important;opacity:0}:is(.ideas-penguin-turn,.ideas-penguin-face){animation:none!important}}
 
 /* Tema oscuro: tonos un poco más suaves para no deslumbrar */
 html[data-theme="dark"] .ideas-avatar-ring>svg path{stroke:#7fb79a}
